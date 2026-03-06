@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { Package, FolderTree, Users, DollarSign, TrendingUp, ShoppingBag } from 'lucide-react';
+import { Package, Users, DollarSign, TrendingUp, ShoppingBag } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
     const [stats, setStats] = useState({

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { UserCircle, Mail, Phone, MapPin } from 'lucide-react';
+import { UserCircle, Mail, Phone } from 'lucide-react';
 
 export const Users: React.FC = () => {
     const [users, setUsers] = useState<any[]>([]);
