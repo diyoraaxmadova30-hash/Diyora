@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"backend/internal/middleware"
 	"backend/internal/services"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,12 +26,15 @@ type LoginRequest struct {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("Login request binding failed: %v", err)
 		middleware.RespondError(c, http.StatusBadRequest, err)
 		return
 	}
 
+	log.Printf("Attempting login for: %s", req.Email)
 	token, user, err := h.AuthService.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
+		log.Printf("Login service failed for %s: %v", req.Email, err)
 		middleware.RespondError(c, http.StatusUnauthorized, err)
 		return
 	}

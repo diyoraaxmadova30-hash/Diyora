@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"log"
 
 	"backend/internal/models"
 	"backend/internal/repositories"
@@ -27,6 +28,7 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (string
 	}
 
 	if !utils.CheckPasswordHash(password, *user.PasswordHash) {
+		log.Printf("Login failed: password mismatch for user %s", email)
 		return "", nil, errors.New("invalid credentials")
 	}
 
