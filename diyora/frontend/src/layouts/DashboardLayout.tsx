@@ -1,3 +1,5 @@
+import React from 'react';
+import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, ShoppingBag, FolderTree, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';

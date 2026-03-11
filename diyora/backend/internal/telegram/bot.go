@@ -185,6 +185,8 @@ func (h *BotHandler) showCategories(chatID int64, msgID int) {
 	cats, err := h.CatRepo.GetAll(context.Background())
 	if err != nil {
 		log.Printf("Bot error fetching categories: %v", err)
+		h.replyText(chatID, "Error loading categories. Please try again later.")
+		return
 	}
 
 	var rows [][]tgbotapi.InlineKeyboardButton
@@ -203,6 +205,8 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID) {
 	prods, err := h.ProdRepo.GetAll(context.Background(), &catID, "", 50, 0)
 	if err != nil {
 		log.Printf("Bot error fetching products for cat %s: %v", catID, err)
+		h.replyText(chatID, "Error loading products. Please try again later.")
+		return
 	}
 
 	if len(prods) == 0 {
