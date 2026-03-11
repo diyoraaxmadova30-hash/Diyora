@@ -8,6 +8,7 @@ import (
 
 	"backend/internal/models"
 	"backend/internal/repositories"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
 )
@@ -181,7 +182,10 @@ func (h *BotHandler) handleStartCmd(chatID int64, user *models.User) {
 }
 
 func (h *BotHandler) showCategories(chatID int64, msgID int) {
-	cats, _ := h.CatRepo.GetAll(context.Background())
+	cats, err := h.CatRepo.GetAll(context.Background())
+	if err != nil {
+		log.Printf("Bot error fetching categories: %v", err)
+	}
 
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, c := range cats {
@@ -196,7 +200,10 @@ func (h *BotHandler) showCategories(chatID int64, msgID int) {
 }
 
 func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID) {
-	prods, _ := h.ProdRepo.GetAll(context.Background(), &catID, "", 50, 0)
+	prods, err := h.ProdRepo.GetAll(context.Background(), &catID, "", 50, 0)
+	if err != nil {
+		log.Printf("Bot error fetching products for cat %s: %v", catID, err)
+	}
 
 	if len(prods) == 0 {
 		h.replyText(chatID, "No products in this category.")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strings"
 
 	"backend/internal/models"
 	"backend/internal/repositories"
@@ -19,6 +20,9 @@ func NewAuthService(userRepo *repositories.UserRepo) *AuthService {
 }
 
 func (s *AuthService) Login(ctx context.Context, email, password string) (string, *models.User, error) {
+	email = strings.TrimSpace(email)
+	password = strings.TrimSpace(password)
+
 	user, err := s.UserRepo.GetByEmail(ctx, email)
 	if err != nil {
 		return "", nil, err

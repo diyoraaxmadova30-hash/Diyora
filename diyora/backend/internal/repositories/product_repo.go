@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 
 	"backend/internal/models"
+
 	"github.com/google/uuid"
 )
 
@@ -55,18 +55,13 @@ func (r *ProductRepo) GetAll(ctx context.Context, categoryID *uuid.UUID, searchQ
 	}
 
 	if searchQuery != "" {
-		baseQuery += fmt.Sprintf(` AND ILIKE(name, $%d)`, argCount)
+		baseQuery += fmt.Sprintf(` AND name ILIKE $%d`, argCount)
 		args = append(args, "%"+searchQuery+"%")
 		argCount++
 	}
 
 	baseQuery += fmt.Sprintf(` ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, argCount, argCount+1)
 	args = append(args, limit, offset)
-
-	// Fix ILIKE syntax issue in postgres
-	baseQuery = strings.Replace(baseQuery, "ILIKE(name,", "name ILIKE ", 1)
-    baseQuery = strings.Replace(baseQuery, ")", "", 1)
-
 
 	rows, err := r.DB.QueryContext(ctx, baseQuery, args...)
 	if err != nil {

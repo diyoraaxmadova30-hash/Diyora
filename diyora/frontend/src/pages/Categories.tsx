@@ -88,7 +88,7 @@ export const Categories: React.FC = () => {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="md:col-span-1 h-fit sticky top-8">
+                <Card className="md:col-span-1 h-fit sticky top-24 lg:top-8 outline-none">
                     <div className="mb-6">
                         <h3 className="text-lg font-bold text-slate-900 mb-1">Quick Search</h3>
                         <p className="text-sm text-slate-500">Find a category by name.</p>
