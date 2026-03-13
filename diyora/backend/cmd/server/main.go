@@ -44,7 +44,7 @@ func main() {
 			log.Printf("Failed to initialize telegram bot: %v", err)
 		} else {
 			log.Printf("Authorized on account %s", botAPI.Self.UserName)
-			botHandler := telegram.NewBotHandler(botAPI, userRepo, catRepo, prodRepo, repositories.NewCartRepo(db), orderRepo)
+			botHandler := telegram.NewBotHandler(botAPI, userRepo, catRepo, prodRepo, repositories.NewCartRepo(db), orderRepo, cfg.BackendURL)
 			go botHandler.StartListening()
 		}
 	} else {

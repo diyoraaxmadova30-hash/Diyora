@@ -14,22 +14,24 @@ import (
 )
 
 type BotHandler struct {
-	Bot       *tgbotapi.BotAPI
-	UserRepo  *repositories.UserRepo
-	CatRepo   *repositories.CategoryRepo
-	ProdRepo  *repositories.ProductRepo
-	CartRepo  *repositories.CartRepo
-	OrderRepo *repositories.OrderRepo
+	Bot        *tgbotapi.BotAPI
+	UserRepo   *repositories.UserRepo
+	CatRepo    *repositories.CategoryRepo
+	ProdRepo   *repositories.ProductRepo
+	CartRepo   *repositories.CartRepo
+	OrderRepo  *repositories.OrderRepo
+	BackendURL string
 }
 
-func NewBotHandler(bot *tgbotapi.BotAPI, uRepo *repositories.UserRepo, cRepo *repositories.CategoryRepo, pRepo *repositories.ProductRepo, cartRepo *repositories.CartRepo, oRepo *repositories.OrderRepo) *BotHandler {
+func NewBotHandler(bot *tgbotapi.BotAPI, uRepo *repositories.UserRepo, cRepo *repositories.CategoryRepo, pRepo *repositories.ProductRepo, cartRepo *repositories.CartRepo, oRepo *repositories.OrderRepo, backendURL string) *BotHandler {
 	return &BotHandler{
-		Bot:       bot,
-		UserRepo:  uRepo,
-		CatRepo:   cRepo,
-		ProdRepo:  pRepo,
-		CartRepo:  cartRepo,
-		OrderRepo: oRepo,
+		Bot:        bot,
+		UserRepo:   uRepo,
+		CatRepo:    cRepo,
+		ProdRepo:   pRepo,
+		CartRepo:   cartRepo,
+		OrderRepo:  oRepo,
+		BackendURL: backendURL,
 	}
 }
 
@@ -258,7 +260,11 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 
 	// If there's an image, send Photo instead
 	if prod.ImageURL != nil && *prod.ImageURL != "" {
-		photo := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(*prod.ImageURL))
+		imageURL := *prod.ImageURL
+		if strings.HasPrefix(imageURL, "/") {
+			imageURL = h.BackendURL + imageURL
+		}
+		photo := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(imageURL))
 		photo.Caption = text
 		photo.ParseMode = "Markdown"
 		photo.ReplyMarkup = keyboard

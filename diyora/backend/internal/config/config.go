@@ -13,6 +13,7 @@ type Config struct {
 	JWTSecret        string
 	TelegramBotToken string
 	FrontendURL      string
+	BackendURL       string
 }
 
 func LoadConfig() *Config {
@@ -27,6 +28,7 @@ func LoadConfig() *Config {
 		JWTSecret:        getEnv("JWT_SECRET", "supersecretkey"),
 		TelegramBotToken: getEnv("TELEGRAM_BOT_TOKEN", ""),
 		FrontendURL:      getEnv("FRONTEND_URL", "http://localhost:5173"),
+		BackendURL:       getEnv("BACKEND_URL", "http://localhost:8080"),
 	}
 }
 
