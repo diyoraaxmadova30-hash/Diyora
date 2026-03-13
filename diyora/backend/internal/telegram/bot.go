@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"backend/internal/models"
@@ -215,35 +216,31 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
 		}
 
-	case "add": // Add to Cart (Standard)
-		if len(parts) > 1 {
+	case "p_inc": // Preview Increment Qty
+		if len(parts) > 2 {
 			prodID, _ := uuid.Parse(parts[1])
-			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
-			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
+			qty, _ := strconv.Atoi(parts[2])
+			qty++
+			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty)
 		}
 
-	case "inc": // Increment Qty
-		if len(parts) > 1 {
+	case "p_dec": // Preview Decrement Qty
+		if len(parts) > 2 {
 			prodID, _ := uuid.Parse(parts[1])
-			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
-			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
-		}
-
-	case "dec": // Decrement Qty
-		if len(parts) > 1 {
-			prodID, _ := uuid.Parse(parts[1])
-			items, _ := h.CartRepo.GetCartItems(ctx, user.ID)
-			for _, item := range items {
-				if item.ProductID == prodID {
-					if item.Quantity > 1 {
-						h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, -1)
-					} else {
-						h.CartRepo.RemoveItem(ctx, cartID, prodID)
-					}
-					break
-				}
+			qty, _ := strconv.Atoi(parts[2])
+			if qty > 1 {
+				qty--
 			}
-			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
+			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty)
+		}
+
+	case "p_add": // Add to Cart from Preview
+		if len(parts) > 2 {
+			prodID, _ := uuid.Parse(parts[1])
+			qty, _ := strconv.Atoi(parts[2])
+			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, qty)
+			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "added_to_cart")))
+			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty) // Just refresh to keep same qty showing
 		}
 
 	case "rm": // Remove from Cart
@@ -386,61 +383,44 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) getProductMessageData(ctx context.Context, prodID uuid.UUID, user *models.User) (*models.Product, string, tgbotapi.InlineKeyboardMarkup, error) {
+func (h *BotHandler) getProductMessageData(ctx context.Context, prodID uuid.UUID, user *models.User, displayQty int) (*models.Product, string, tgbotapi.InlineKeyboardMarkup, error) {
 	prod, err := h.ProdRepo.GetByID(ctx, prodID)
 	if err != nil || prod == nil {
 		return nil, "", tgbotapi.InlineKeyboardMarkup{}, err
 	}
 
-	qty := 0
-	cartItems, _ := h.CartRepo.GetCartItems(ctx, user.ID)
-	for _, item := range cartItems {
-		if item.ProductID == prodID {
-			qty = item.Quantity
-			break
-		}
+	if displayQty < 1 {
+		displayQty = 1
 	}
 
-	desc := ""
-	if prod.Description != nil {
-		desc = *prod.Description
+	totalPrice := prod.Price * float64(displayQty)
+
+	text := fmt.Sprintf("📦 *%s*\n\nЦена: %.0f UZS\nКоличество: %d\nИтого: %.0f UZS", prod.Name, prod.Price, displayQty, totalPrice)
+	if prod.Description != nil && *prod.Description != "" {
+		text += fmt.Sprintf("\n\n%s", *prod.Description)
 	}
 
-	text := fmt.Sprintf("📦 *%s*\n💰 *$%.2f*\n\n%s", prod.Name, prod.Price, desc)
-	if qty > 0 {
-		text += fmt.Sprintf("\n\n🛒 In Cart: *%d*", qty)
-	}
-
-	var keyboard tgbotapi.InlineKeyboardMarkup
-	if qty == 0 {
-		keyboard = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "add_to_cart"), "add:"+prod.ID.String()),
-			),
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
-			),
-		)
-	} else {
-		keyboard = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("➖", "dec:"+prod.ID.String()),
-				tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", qty), "none"),
-				tgbotapi.NewInlineKeyboardButtonData("➕", "inc:"+prod.ID.String()),
-			),
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("🛒 "+h.T(user, "view_cart"), "cart"),
-				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
-			),
-		)
-	}
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("-", fmt.Sprintf("p_dec:%s:%d", prod.ID.String(), displayQty)),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", displayQty), "none"),
+			tgbotapi.NewInlineKeyboardButtonData("+", fmt.Sprintf("p_inc:%s:%d", prod.ID.String(), displayQty)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "add_to_cart"), fmt.Sprintf("p_add:%s:%d", prod.ID.String(), displayQty)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⬅️ "+h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
+			tgbotapi.NewInlineKeyboardButtonData("🛒 "+h.T(user, "view_cart"), "cart"),
+		),
+	)
 
 	return prod, text, keyboard, nil
 }
 
 func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User) {
 	ctx := context.Background()
-	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user)
+	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user, 1)
 	if err != nil {
 		h.replyText(chatID, h.T(user, "err_loading"))
 		return
@@ -478,9 +458,9 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 	}
 }
 
-func (h *BotHandler) updateProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User) {
+func (h *BotHandler) updateProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User, displayQty int) {
 	ctx := context.Background()
-	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user)
+	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user, displayQty)
 	if err != nil {
 		h.replyText(chatID, h.T(user, "err_loading"))
 		return
