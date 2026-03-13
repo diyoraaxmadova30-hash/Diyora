@@ -129,84 +129,84 @@ export const Products: React.FC = () => {
     );
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-6 lg:space-y-10 animate-fade-in overflow-x-hidden">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Products</h1>
-                    <p className="text-slate-500 font-medium">Manage your inventory and showcase your items.</p>
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Products</h1>
+                    <p className="text-sm lg:text-base text-slate-500 font-medium">Manage your inventory and showcase your items.</p>
                 </div>
-                <Button onClick={openNew} className="h-12 px-6">
+                <Button onClick={openNew} className="w-full md:w-auto h-12 px-8 shadow-lg shadow-primary/20">
                     <Plus className="w-5 h-5 mr-3" />
                     <span>Add New Product</span>
                 </Button>
             </header>
 
-            <Card className="p-0 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">
+            <Card className="p-0 overflow-hidden border-none shadow-xl shadow-slate-200/50">
+                <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
                     <div className="w-full md:max-w-md">
                         <Input
                             placeholder="Search products..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             icon={<Search className="w-5 h-5 text-slate-400" />}
-                            className="bg-white"
+                            className="bg-slate-50/50 border-none ring-1 ring-slate-100"
                         />
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" className="h-10">
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                        <Button variant="outline" size="sm" className="h-10 flex-1 md:flex-none border-slate-100 hover:bg-slate-50 rounded-xl">
                             <Filter className="w-4 h-4 mr-2" />
                             Filters
                         </Button>
-                        <p className="text-sm font-bold text-slate-400 bg-white px-3 py-2 rounded-xl border border-slate-100 italic">
-                            {filteredProducts.length} Products Found
+                        <p className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-100 uppercase tracking-widest whitespace-nowrap">
+                            {filteredProducts.length} Products
                         </p>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left min-w-[700px] lg:min-w-full">
                         <thead className="bg-slate-50/50">
                             <tr>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Product Details</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Category</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Price</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Actions</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Product Details</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Category</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Price</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredProducts.map((prod) => {
                                 const cat = categories.find(c => c.id === prod.category_id);
                                 return (
-                                    <tr key={prod.id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-14 h-14 bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-200 group-hover:scale-105 transition-transform">
+                                    <tr key={prod.id} className="hover:bg-slate-50/30 transition-colors group">
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                            <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
+                                                <div className="w-12 h-12 lg:w-14 lg:h-14 bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 group-hover:shadow-lg group-hover:scale-105 transition-all duration-300 flex-shrink-0">
                                                     {prod.image_url ? (
                                                         <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${prod.image_url}`} alt={prod.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <ImageIcon className="w-6 h-6 text-slate-300" />
+                                                        <ImageIcon className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300" />
                                                     )}
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-900">{prod.name}</p>
-                                                    <p className="text-sm text-slate-500 max-w-xs truncate">{prod.description || 'No description'}</p>
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-slate-900 truncate">{prod.name}</p>
+                                                    <p className="text-xs lg:text-sm text-slate-400 truncate max-w-[150px] lg:max-w-xs">{prod.description || 'No description'}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-8 py-5">
-                                            <Badge variant="info" className="py-1 px-3">
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                            <Badge variant="info" className="py-1 px-3 text-[10px] font-black tracking-widest uppercase">
                                                 {cat?.name || 'Uncategorized'}
                                             </Badge>
                                         </td>
-                                        <td className="px-8 py-5">
-                                            <p className="font-black text-slate-900">${parseFloat(prod.price).toFixed(2)}</p>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                            <p className="font-black text-slate-900 tracking-tight">${parseFloat(prod.price).toFixed(2)}</p>
                                         </td>
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="sm" onClick={() => openEdit(prod)} className="w-10 h-10 p-0 text-indigo-600 hover:bg-indigo-50">
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                            <div className="flex items-center justify-end gap-1.5 lg:gap-2">
+                                                <Button variant="ghost" size="sm" onClick={() => openEdit(prod)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-indigo-600 hover:bg-indigo-50 rounded-xl">
                                                     <Pencil className="w-4 h-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="sm" onClick={() => handleDelete(prod.id)} className="w-10 h-10 p-0 text-accent hover:bg-accent/10">
+                                                <Button variant="ghost" size="sm" onClick={() => handleDelete(prod.id)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-accent hover:bg-accent/10 rounded-xl">
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>
                                             </div>

@@ -44,18 +44,18 @@ export const Modal: React.FC<ModalProps> = ({
             {/* Modal */}
             <div
                 className={cn(
-                    'relative w-full glass rounded-3xl p-8 shadow-2xl animate-scale-in',
+                    'relative w-full glass rounded-2xl lg:rounded-3xl p-6 lg:p-8 shadow-2xl animate-scale-in max-h-[90vh] flex flex-col',
                     sizes[size],
                     className
                 )}
             >
-                <div className="flex items-center justify-between mb-8">
-                    {title && <h2 className="text-2xl font-bold text-slate-900">{title}</h2>}
+                <div className="flex items-center justify-between mb-6 lg:mb-8 flex-shrink-0">
+                    {title && <h2 className="text-xl lg:text-2xl font-bold text-slate-900 truncate pr-4">{title}</h2>}
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all flex-shrink-0"
                     >
-                        <X className="w-6 h-6" />
+                        <X className="w-5 h-5 lg:w-6 lg:h-6" />
                     </button>
                 </div>
 

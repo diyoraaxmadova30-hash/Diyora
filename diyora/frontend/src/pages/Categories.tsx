@@ -75,21 +75,21 @@ export const Categories: React.FC = () => {
     );
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-6 lg:space-y-10 animate-fade-in overflow-x-hidden">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Categories</h1>
-                    <p className="text-slate-500 font-medium">Organize your products into logical groups.</p>
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Categories</h1>
+                    <p className="text-sm lg:text-base text-slate-500 font-medium">Organize your products into logical groups.</p>
                 </div>
-                <Button onClick={() => { setEditId(null); setName(''); setModalOpen(true); }} className="h-12 px-6">
+                <Button onClick={() => { setEditId(null); setName(''); setModalOpen(true); }} className="w-full md:w-auto h-12 px-8 shadow-lg shadow-primary/20">
                     <Plus className="w-5 h-5 mr-3" />
                     <span>Create Category</span>
                 </Button>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="md:col-span-1 h-fit sticky top-24 lg:top-8 outline-none">
-                    <div className="mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                <Card className="lg:col-span-1 h-fit lg:sticky lg:top-8 border-none shadow-xl shadow-slate-200/50">
+                    <div className="mb-6 px-2">
                         <h3 className="text-lg font-bold text-slate-900 mb-1">Quick Search</h3>
                         <p className="text-sm text-slate-500">Find a category by name.</p>
                     </div>
@@ -98,33 +98,34 @@ export const Categories: React.FC = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         icon={<Search className="w-5 h-5 text-slate-400" />}
+                        className="bg-slate-50/50 border-none ring-1 ring-slate-100"
                     />
                     <div className="mt-8 pt-8 border-t border-slate-50">
                         <div className="flex items-center gap-3 text-primary bg-primary/5 p-4 rounded-2xl border border-primary/10">
                             <FolderTree className="w-5 h-5" />
-                            <span className="text-sm font-bold uppercase tracking-wider">{categories.length} Total Categories</span>
+                            <span className="text-xs font-black uppercase tracking-widest">{categories.length} Total Categories</span>
                         </div>
                     </div>
                 </Card>
 
-                <div className="md:col-span-2 space-y-4">
+                <div className="lg:col-span-2 space-y-4">
                     {filteredCategories.map((cat) => (
-                        <Card key={cat.id} className="group hover:border-primary/30 transition-all duration-300 py-4 px-6">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
-                                        <FolderTree className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
+                        <Card key={cat.id} className="group hover:bg-slate-50/30 transition-all duration-300 py-3 lg:py-4 px-4 lg:px-6 border-none shadow-lg shadow-slate-200/40">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 group-hover:bg-primary group-hover:border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300 flex-shrink-0">
+                                        <FolderTree className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400 group-hover:text-white transition-colors" />
                                     </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">{cat.name}</h3>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">ID: {cat.id.substring(0, 8)}...</p>
+                                    <div className="min-w-0">
+                                        <h3 className="text-base lg:text-lg font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{cat.name}</h3>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">ID: {cat.id.substring(0, 8)}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="sm" onClick={() => openEdit(cat)} className="w-10 h-10 p-0 text-indigo-600 hover:bg-indigo-50">
+                                <div className="flex items-center gap-1 lg:gap-2 flex-shrink-0">
+                                    <Button variant="ghost" size="sm" onClick={() => openEdit(cat)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-indigo-600 hover:bg-indigo-50 rounded-xl">
                                         <Pencil className="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(cat.id)} className="w-10 h-10 p-0 text-accent hover:bg-accent/10">
+                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(cat.id)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-accent hover:bg-accent/10 rounded-xl">
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>

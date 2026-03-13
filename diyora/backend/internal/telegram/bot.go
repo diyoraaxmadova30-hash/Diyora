@@ -14,6 +14,102 @@ import (
 	"github.com/google/uuid"
 )
 
+var translations = map[string]map[string]string{
+	"en": {
+		"welcome":           "Welcome to the shop, *%s*!\nWhat would you like to do?",
+		"browse_cats":       "🛍️ Browse Categories",
+		"view_cart":         "🛒 View Cart",
+		"choose_cat":        "📂 *Choose a category:*",
+		"err_loading":       "⚠️ Error loading. Please try again later.",
+		"no_prods":          "📭 No products in this category.",
+		"products":          "📦 *Products:*",
+		"back_to_cats":      "🔙 Back to Categories",
+		"add_to_cart":       "➕ Add to Cart",
+		"back_to_cat":       "🔙 Back to Category",
+		"added_to_cart":     "✅ Added to cart!",
+		"removed_from_cart": "🗑️ Removed from cart!",
+		"what_next":         "❓ *What would you like to do next?*",
+		"keep_shopping":     "🛍️ Keep Shopping",
+		"cart_empty":        "📭 Your cart is empty.",
+		"your_cart":         "🛒 *Your Cart*",
+		"total":             "Total",
+		"checkout":          "💳 Checkout",
+		"order_placed":      "✅ *Order Placed!*\n\n🆔 ID: `%s`\n💰 Total: *$%.2f*\n📊 Status: _%s_\n\n📞 We will contact you shortly!",
+		"lang_selected":     "🇺🇸 Language updated to English!",
+		"select_lang":       "🌐 Please select your language:",
+		"unknown_cmd":       "❓ Unknown command. Try /start",
+		"start_browse":      "👋 Send /start to browse the shop!",
+		"remove":            "❌ Remove",
+	},
+	"uz": {
+		"welcome":           "Do'konga xush kelibsiz, *%s*!\nNima qilmoqchisiz?",
+		"browse_cats":       "🛍️ Kategoriyalarni ko'rish",
+		"view_cart":         "🛒 Savatchani ko'rish",
+		"choose_cat":        "📂 *Kategoriyani tanlang:*",
+		"err_loading":       "⚠️ Xatolik yuz berdi. Keyinroq qayta urinib ko'ring.",
+		"no_prods":          "📭 Ushbu kategoriyada mahsulotlar yo'q.",
+		"products":          "📦 *Mahsulotlar:*",
+		"back_to_cats":      "🔙 Kategoriyalarga qaytish",
+		"add_to_cart":       "➕ Savatchaga qo'shish",
+		"back_to_cat":       "🔙 Kategoriyaga qaytish",
+		"added_to_cart":     "✅ Savatchaga qo'shildi!",
+		"removed_from_cart": "🗑️ Savatchadan olib tashlandi!",
+		"what_next":         "❓ *Keyingi qadam?*",
+		"keep_shopping":     "🛍️ Xaridni davom ettirish",
+		"cart_empty":        "📭 Savatchangiz bo'sh.",
+		"your_cart":         "🛒 *Sizning savatchangiz*",
+		"total":             "Jami",
+		"checkout":          "💳 Buyurtma berish",
+		"order_placed":      "✅ *Buyurtma qabul qilindi!*\n\n🆔 ID: `%s`\n💰 Jami: *$%.2f*\n📊 Holat: _%s_\n\n📞 Tez orada siz bilan bog'lanamiz!",
+		"lang_selected":     "🇺🇿 Til o'zbek tiliga o'zgartirildi!",
+		"select_lang":       "🌐 Iltimos, tilni tanlang:",
+		"unknown_cmd":       "❓ Noma'lum buyruq. /start ni bosing",
+		"start_browse":      "👋 Xarid qilish uchun /start ni bosing!",
+		"remove":            "❌ O'chirish",
+	},
+	"ru": {
+		"welcome":           "Добро пожаловать в магазин, *%s*!\nЧто бы вы хотели сделать?",
+		"browse_cats":       "🛍️ Просмотреть категории",
+		"view_cart":         "🛒 Просмотреть корзину",
+		"choose_cat":        "📂 *Выберите категорию:*",
+		"err_loading":       "⚠️ Ошибка загрузки. Пожалуйста, попробуйте позже.",
+		"no_prods":          "📭 В этой категории нет товаров.",
+		"products":          "📦 *Товары:*",
+		"back_to_cats":      "🔙 Назад к категориям",
+		"add_to_cart":       "➕ Добавить в корзину",
+		"back_to_cat":       "🔙 Назад к категории",
+		"added_to_cart":     "✅ Добавлено в корзину!",
+		"removed_from_cart": "🗑️ Удалено из корзины!",
+		"what_next":         "❓ *Что дальше?*",
+		"keep_shopping":     "🛍️ Продолжить покупки",
+		"cart_empty":        "📭 Ваша корзина пуста.",
+		"your_cart":         "🛒 *Ваша корзина*",
+		"total":             "Итого",
+		"checkout":          "💳 Оформить заказ",
+		"order_placed":      "✅ *Заказ оформлен!*\n\n🆔 ID: `%s`\n💰 Итого: *$%.2f*\n📊 Статус: _%s_\n\n📞 Мы свяжемся с вами в ближайшее время!",
+		"lang_selected":     "🇷🇺 Язык изменен на русский!",
+		"select_lang":       "🌐 Пожалуйста, выберите язык:",
+		"unknown_cmd":       "❓ Неизвестная команда. Попробуйте /start",
+		"start_browse":      "👋 Отправьте /start, чтобы просмотреть магазин!",
+		"remove":            "❌ Удалить",
+	},
+}
+
+func (h *BotHandler) T(user *models.User, key string) string {
+	lang := "en"
+	if user.Language != nil {
+		lang = *user.Language
+	}
+	if t, ok := translations[lang][key]; ok {
+		return t
+	}
+	return key
+}
+
+func (h *BotHandler) Tf(user *models.User, key string, args ...interface{}) string {
+	return fmt.Sprintf(h.T(user, key), args...)
+}
+
 type BotHandler struct {
 	Bot        *tgbotapi.BotAPI
 	UserRepo   *repositories.UserRepo
@@ -66,15 +162,12 @@ func (h *BotHandler) handleMessage(msg *tgbotapi.Message) {
 		case "start":
 			h.handleStartCmd(msg.Chat.ID, user)
 		default:
-			h.replyText(msg.Chat.ID, "Unknown command. Try /start")
+			h.replyText(msg.Chat.ID, h.T(user, "unknown_cmd"))
 		}
 		return
 	}
 
-	// State Machine / Text Input check logic (for shipping address etc.)
-	// A simple approach: if user is pending address input (based on some state), handle it.
-	// For production we'd want a Redis-backed FSM.
-	h.replyText(msg.Chat.ID, "Send /start to browse the shop!")
+	h.replyText(msg.Chat.ID, h.T(user, "start_browse"))
 }
 
 func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
@@ -97,42 +190,75 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 	action := parts[0]
 
 	switch action {
+	case "set_lang":
+		if len(parts) > 1 {
+			lang := parts[1]
+			h.UserRepo.UpdateLanguage(ctx, user.ID, lang)
+			user.Language = &lang
+			h.Bot.Request(tgbotapi.NewCallback(cb.ID, h.T(user, "lang_selected")))
+			h.handleStartCmd(cb.Message.Chat.ID, user)
+		}
+
 	case "cats": // View Categories
-		h.showCategories(cb.Message.Chat.ID, cb.Message.MessageID)
+		h.showCategories(cb.Message.Chat.ID, cb.Message.MessageID, user)
 
 	case "cat": // View Products in Category
 		if len(parts) > 1 {
 			catID, _ := uuid.Parse(parts[1])
-			h.showProducts(cb.Message.Chat.ID, cb.Message.MessageID, catID)
+			h.showProducts(cb.Message.Chat.ID, cb.Message.MessageID, catID, user)
 		}
 
 	case "prod": // View single Product detail
 		if len(parts) > 1 {
 			prodID, _ := uuid.Parse(parts[1])
-			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID)
+			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
 		}
 
-	case "add": // Add to Cart
+	case "add": // Add to Cart (Standard)
 		if len(parts) > 1 {
 			prodID, _ := uuid.Parse(parts[1])
 			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
-			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, "Added to cart!"))
-			h.showCartOptions(cb.Message.Chat.ID)
+			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "added_to_cart")))
+			h.showCartOptions(cb.Message.Chat.ID, user)
 		}
 
-	case "rm": // Remvoe from Cart
+	case "inc": // Increment Qty
+		if len(parts) > 1 {
+			prodID, _ := uuid.Parse(parts[1])
+			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
+			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
+		}
+
+	case "dec": // Decrement Qty
+		if len(parts) > 1 {
+			prodID, _ := uuid.Parse(parts[1])
+			items, _ := h.CartRepo.GetCartItems(ctx, user.ID)
+			for _, item := range items {
+				if item.ProductID == prodID {
+					if item.Quantity > 1 {
+						h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, -1)
+					} else {
+						h.CartRepo.RemoveItem(ctx, cartID, prodID)
+					}
+					break
+				}
+			}
+			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
+		}
+
+	case "rm": // Remove from Cart
 		if len(parts) > 1 {
 			prodID, _ := uuid.Parse(parts[1])
 			h.CartRepo.RemoveItem(ctx, cartID, prodID)
-			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, "Removed from cart!"))
-			h.showCart(cb.Message.Chat.ID, cb.Message.MessageID, user.ID)
+			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "removed_from_cart")))
+			h.showCart(cb.Message.Chat.ID, cb.Message.MessageID, user)
 		}
 
 	case "cart": // View Cart
-		h.showCart(cb.Message.Chat.ID, cb.Message.MessageID, user.ID)
+		h.showCart(cb.Message.Chat.ID, cb.Message.MessageID, user)
 
 	case "checkout":
-		h.handleCheckout(cb.Message.Chat.ID, user.ID, cartID)
+		h.handleCheckout(cb.Message.Chat.ID, user, cartID)
 	}
 
 	// Always answer callback to clear loading state
@@ -172,23 +298,41 @@ func (h *BotHandler) replyText(chatID int64, text string) {
 }
 
 func (h *BotHandler) handleStartCmd(chatID int64, user *models.User) {
-	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Welcome to the shop, %s!\nWhat would you like to do?", *user.Name))
+	if user.Language == nil {
+		h.showLanguageSelection(chatID, user)
+		return
+	}
+
+	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "welcome", *user.Name))
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🛍️ Browse Categories", "cats"),
-			tgbotapi.NewInlineKeyboardButtonData("🛒 View Cart", "cart"),
+			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "browse_cats"), "cats"),
+			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "view_cart"), "cart"),
 		),
 	)
 	msg.ReplyMarkup = keyboard
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) showCategories(chatID int64, msgID int) {
+func (h *BotHandler) showLanguageSelection(chatID int64, user *models.User) {
+	msg := tgbotapi.NewMessage(chatID, "Please select your language / Илтимос, тилни танланг / Пожалуйста, выберите язык:")
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🇺🇿 O'zbekcha", "set_lang:uz"),
+			tgbotapi.NewInlineKeyboardButtonData("🇷🇺 Русский", "set_lang:ru"),
+			tgbotapi.NewInlineKeyboardButtonData("🇺🇸 English", "set_lang:en"),
+		),
+	)
+	msg.ReplyMarkup = keyboard
+	h.Bot.Send(msg)
+}
+
+func (h *BotHandler) showCategories(chatID int64, msgID int, user *models.User) {
 	cats, err := h.CatRepo.GetAll(context.Background())
 	if err != nil {
 		log.Printf("Bot error fetching categories: %v", err)
-		h.replyText(chatID, "Error loading categories. Please try again later.")
+		h.replyText(chatID, h.T(user, "err_loading"))
 		return
 	}
 
@@ -199,21 +343,22 @@ func (h *BotHandler) showCategories(chatID int64, msgID int) {
 		))
 	}
 
-	msg := tgbotapi.NewMessage(chatID, "Choose a category:")
+	msg := tgbotapi.NewMessage(chatID, h.T(user, "choose_cat"))
+	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(rows...)
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID) {
+func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user *models.User) {
 	prods, err := h.ProdRepo.GetAll(context.Background(), &catID, "", 50, 0)
 	if err != nil {
 		log.Printf("Bot error fetching products for cat %s: %v", catID, err)
-		h.replyText(chatID, "Error loading products. Please try again later.")
+		h.replyText(chatID, h.T(user, "err_loading"))
 		return
 	}
 
 	if len(prods) == 0 {
-		h.replyText(chatID, "No products in this category.")
+		h.replyText(chatID, h.T(user, "no_prods"))
 		return
 	}
 
@@ -225,19 +370,31 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID) {
 
 	// Add Back button
 	rows = append(rows, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("🔙 Back to Categories", "cats"),
+		tgbotapi.NewInlineKeyboardButtonData(h.T(user, "back_to_cats"), "cats"),
 	))
 
-	msg := tgbotapi.NewMessage(chatID, "Products:")
+	msg := tgbotapi.NewMessage(chatID, h.T(user, "products"))
+	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(rows...)
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUID) {
-	prod, err := h.ProdRepo.GetByID(context.Background(), prodID)
+func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User) {
+	ctx := context.Background()
+	prod, err := h.ProdRepo.GetByID(ctx, prodID)
 	if err != nil || prod == nil {
-		h.replyText(chatID, "Product not found")
+		h.replyText(chatID, h.T(user, "err_loading"))
 		return
+	}
+
+	// Get current quantity in cart
+	qty := 0
+	cartItems, _ := h.CartRepo.GetCartItems(ctx, user.ID)
+	for _, item := range cartItems {
+		if item.ProductID == prodID {
+			qty = item.Quantity
+			break
+		}
 	}
 
 	desc := ""
@@ -245,37 +402,45 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 		desc = *prod.Description
 	}
 
-	text := fmt.Sprintf("📦 *%s*\n💰 $%.2f\n\n%s", prod.Name, prod.Price, desc)
-	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	text := fmt.Sprintf("📦 *%s*\n💰 *$%.2f*\n\n%s", prod.Name, prod.Price, desc)
+	if qty > 0 {
+		text += fmt.Sprintf("\n\n🛒 In Cart: *%d*", qty)
+	}
 
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("➕ Add to Cart", "add:"+prod.ID.String()),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔙 Back to Category", "cat:"+prod.CategoryID.String()),
-		),
-	)
-	msg.ReplyMarkup = keyboard
+	var keyboard tgbotapi.InlineKeyboardMarkup
+	if qty == 0 {
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "add_to_cart"), "add:"+prod.ID.String()),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
+			),
+		)
+	} else {
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("➖", "dec:"+prod.ID.String()),
+				tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", qty), "none"),
+				tgbotapi.NewInlineKeyboardButtonData("➕", "inc:"+prod.ID.String()),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "view_cart"), "cart"),
+				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
+			),
+		)
+	}
 
 	// If there's an image, send Photo instead
 	if prod.ImageURL != nil && *prod.ImageURL != "" {
 		origURL := *prod.ImageURL
 		var photo tgbotapi.PhotoConfig
 
-		// If it's a local upload, try sending as FilePath
-		if strings.HasPrefix(origURL, "/uploads/") {
-			localPath := "." + origURL // Assuming CWD is backend/
-			if _, err := os.Stat(localPath); err == nil {
-				photo = tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(localPath))
-			} else {
-				// Fallback to URL if file not found locally
-				photo = tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(h.BackendURL+origURL))
-			}
+		localPath := "." + origURL
+		if strings.HasPrefix(origURL, "/uploads/") && fileExists(localPath) {
+			photo = tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(localPath))
 		} else {
-			// Remote URL
-			photo = tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(origURL))
+			photo = tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(h.BackendURL+origURL))
 		}
 
 		photo.Caption = text
@@ -285,35 +450,48 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 		_, err := h.Bot.Send(photo)
 		if err != nil {
 			log.Printf("Error sending photo: %v", err)
-			// Fallback: send text if photo fails
+			msg := tgbotapi.NewMessage(chatID, text)
+			msg.ParseMode = "Markdown"
+			msg.ReplyMarkup = keyboard
 			h.Bot.Send(msg)
 		}
 	} else {
+		msg := tgbotapi.NewMessage(chatID, text)
+		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = keyboard
 		h.Bot.Send(msg)
 	}
 }
 
-func (h *BotHandler) showCartOptions(chatID int64) {
-	msg := tgbotapi.NewMessage(chatID, "What next?")
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func (h *BotHandler) showCartOptions(chatID int64, user *models.User) {
+	msg := tgbotapi.NewMessage(chatID, h.T(user, "what_next"))
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🛒 View Cart", "cart"),
-			tgbotapi.NewInlineKeyboardButtonData("🛍️ Keep Shopping", "cats"),
+			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "view_cart"), "cart"),
+			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "keep_shopping"), "cats"),
 		),
 	)
 	msg.ReplyMarkup = keyboard
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) showCart(chatID int64, msgID int, userID uuid.UUID) {
-	items, err := h.CartRepo.GetCartItems(context.Background(), userID)
+func (h *BotHandler) showCart(chatID int64, msgID int, user *models.User) {
+	items, err := h.CartRepo.GetCartItems(context.Background(), user.ID)
 	if err != nil || len(items) == 0 {
-		h.replyText(chatID, "Your cart is empty.")
+		h.replyText(chatID, h.T(user, "cart_empty"))
 		return
 	}
 
 	var total float64
-	text := "🛒 *Your Cart*\n\n"
+	text := h.T(user, "your_cart") + "\n\n"
 
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, item := range items {
@@ -322,15 +500,15 @@ func (h *BotHandler) showCart(chatID int64, msgID int, userID uuid.UUID) {
 		text += fmt.Sprintf("▪️ %s (x%d) - $%.2f\n", item.Product.Name, item.Quantity, sub)
 
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("❌ Remove "+item.Product.Name[:min(len(item.Product.Name), 10)], "rm:"+item.Product.ID.String()),
+			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "remove")+" "+item.Product.Name[:min(len(item.Product.Name), 10)], "rm:"+item.Product.ID.String()),
 		))
 	}
 
-	text += fmt.Sprintf("\n*Total: $%.2f*", total)
+	text += fmt.Sprintf("\n*%s: $%.2f*", h.T(user, "total"), total)
 
 	rows = append(rows, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("💳 Checkout", "checkout"),
-		tgbotapi.NewInlineKeyboardButtonData("🛍️ Keep Shopping", "cats"),
+		tgbotapi.NewInlineKeyboardButtonData(h.T(user, "checkout"), "checkout"),
+		tgbotapi.NewInlineKeyboardButtonData(h.T(user, "keep_shopping"), "cats"),
 	))
 
 	msg := tgbotapi.NewMessage(chatID, text)
@@ -339,24 +517,23 @@ func (h *BotHandler) showCart(chatID int64, msgID int, userID uuid.UUID) {
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) handleCheckout(chatID int64, userID uuid.UUID, cartID uuid.UUID) {
-	items, err := h.CartRepo.GetCartItems(context.Background(), userID)
+func (h *BotHandler) handleCheckout(chatID int64, user *models.User, cartID uuid.UUID) {
+	items, err := h.CartRepo.GetCartItems(context.Background(), user.ID)
 	if err != nil || len(items) == 0 {
-		h.replyText(chatID, "Cart is empty!")
+		h.replyText(chatID, h.T(user, "cart_empty"))
 		return
 	}
 
-	// Fast-track checkout with a dummy address for demo.
-	// In reality you'd prompt user for address input via FSM.
+	// Fast track checkout...
 	dummyAddress := "123 Main St"
 
-	order, err := h.OrderRepo.CreateOrder(context.Background(), userID, dummyAddress, items, cartID)
+	order, err := h.OrderRepo.CreateOrder(context.Background(), user.ID, dummyAddress, items, cartID)
 	if err != nil {
-		h.replyText(chatID, "Error processing order: "+err.Error())
+		h.replyText(chatID, h.T(user, "err_loading")+" "+err.Error())
 		return
 	}
 
-	h.replyText(chatID, fmt.Sprintf("✅ *Order Placed!*\nOrder ID: `%s`\nTotal: $%.2f\nStatus: %s\n\nWe will contact you shortly!", order.ID, order.TotalPrice, order.Status))
+	h.replyText(chatID, h.Tf(user, "order_placed", order.ID, order.TotalPrice, order.Status))
 }
 
 func min(a, b int) int {

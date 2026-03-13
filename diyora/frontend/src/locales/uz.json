@@ -1,0 +1,22 @@
+{
+    "dashboard": "Boshqaruv paneli",
+    "users": "Foydalanuvchilar",
+    "categories": "Kategoriyalar",
+    "products": "Mahsulotlar",
+    "orders": "Buyurtmalar",
+    "logout": "Chiqish",
+    "language": "Til",
+    "welcome": "Xush kelibsiz",
+    "add": "Qo'shish",
+    "edit": "Tahrirlash",
+    "delete": "O'chirish",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "name": "Nomi",
+    "email": "Elektron pochta",
+    "role": "Roli",
+    "status": "Holati",
+    "price": "Narxi",
+    "description": "Tavsifi",
+    "actions": "Amallar"
+}

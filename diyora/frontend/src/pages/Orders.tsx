@@ -71,76 +71,78 @@ export const Orders: React.FC = () => {
     );
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            <header>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Orders Management</h1>
-                <p className="text-slate-500 font-medium">Track and process your store's transactions.</p>
+        <div className="space-y-6 lg:space-y-10 animate-fade-in overflow-x-hidden">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Orders Management</h1>
+                    <p className="text-sm lg:text-base text-slate-500 font-medium">Track and process your store's transactions.</p>
+                </div>
             </header>
 
-            <Card className="p-0 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">
+            <Card className="p-0 overflow-hidden border-none shadow-xl shadow-slate-200/50">
+                <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
                     <div className="w-full md:max-w-md">
                         <Input
                             placeholder="Search by Order ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             icon={<Search className="w-5 h-5 text-slate-400" />}
-                            className="bg-white"
+                            className="bg-slate-50/50 border-none ring-1 ring-slate-100"
                         />
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" className="h-10">
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                        <Button variant="outline" size="sm" className="h-10 flex-1 md:flex-none border-slate-100 hover:bg-slate-50 rounded-xl">
                             <Filter className="w-4 h-4 mr-2" />
                             Filters
                         </Button>
-                        <p className="text-sm font-bold text-slate-400 bg-white px-3 py-2 rounded-xl border border-slate-100 italic">
+                        <p className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-100 uppercase tracking-widest whitespace-nowrap">
                             {filteredOrders.length} Orders
                         </p>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left min-w-[800px] lg:min-w-full">
                         <thead className="bg-slate-50/50">
                             <tr>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Order Information</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Time</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Total Price</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Current Status</th>
-                                <th className="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Update Status</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Order Information</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Time</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Total Price</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Current Status</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Update Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredOrders.map((order) => (
-                                <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
-                                                <Package className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
+                                <tr key={order.id} className="hover:bg-slate-50/30 transition-colors group">
+                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                        <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
+                                            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 group-hover:bg-primary group-hover:border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300 flex-shrink-0">
+                                                <Package className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400 group-hover:text-white transition-colors" />
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-slate-900 font-mono tracking-tight text-sm">#{order.id.substring(0, 8).toUpperCase()}</p>
-                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Customer ID: {order.user_id.substring(0, 6)}...</p>
+                                            <div className="min-w-0">
+                                                <p className="font-bold text-slate-900 font-mono tracking-tight text-sm truncate">#{order.id.substring(0, 8).toUpperCase()}</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Customer ID: {order.user_id.substring(0, 6)}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-5">
-                                        <div className="text-sm font-medium text-slate-600">
+                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                        <div className="text-sm font-bold text-slate-700">
                                             {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                                         </div>
-                                        <div className="text-xs font-bold text-slate-400 uppercase">
+                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                             {new Date(order.created_at).toLocaleTimeString(undefined, { timeStyle: 'short' })}
                                         </div>
                                     </td>
-                                    <td className="px-8 py-5">
+                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
                                         <p className="font-black text-slate-900 tracking-tight text-lg">${order.total_price.toFixed(2)}</p>
                                     </td>
-                                    <td className="px-8 py-5">
+                                    <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap">
                                         <StatusBadge status={order.status} />
                                     </td>
-                                    <td className="px-8 py-5 text-right">
+                                    <td className="px-6 lg:px-8 py-4 lg:py-5 text-right">
                                         <select
-                                            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:bg-white"
+                                            className="bg-slate-50 border-none ring-1 ring-slate-100 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:bg-white text-center min-w-[120px]"
                                             value={order.status}
                                             onChange={(e) => updateStatus(order.id, e.target.value)}
                                         >
@@ -158,9 +160,9 @@ export const Orders: React.FC = () => {
                 </div>
 
                 {filteredOrders.length === 0 && (
-                    <div className="text-center py-20 bg-slate-50/50">
-                        <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No orders found</p>
+                    <div className="text-center py-20 bg-white">
+                        <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                        <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No orders found</p>
                     </div>
                 )}
             </Card>

@@ -1,0 +1,22 @@
+{
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "categories": "Categories",
+    "products": "Products",
+    "orders": "Orders",
+    "logout": "Logout",
+    "language": "Language",
+    "welcome": "Welcome",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "price": "Price",
+    "description": "Description",
+    "actions": "Actions"
+}

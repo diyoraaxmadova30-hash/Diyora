@@ -1,11 +1,14 @@
 import React from 'react';
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, ShoppingBag, FolderTree, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export const ProtectedRoute: React.FC = () => {
     const { user, loading } = useAuth();
+    const { t } = useTranslation();
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-background">
@@ -20,15 +23,16 @@ export const ProtectedRoute: React.FC = () => {
 
 export const DashboardLayout: React.FC = () => {
     const { logout, user } = useAuth();
+    const { t } = useTranslation();
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     const navigation = [
-        { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-        { name: 'Categories', href: '/categories', icon: FolderTree },
-        { name: 'Products', href: '/products', icon: ShoppingBag },
-        { name: 'Orders', href: '/orders', icon: ShoppingCart },
-        { name: 'Users', href: '/users', icon: Users },
+        { name: t('dashboard'), href: '/', icon: LayoutDashboard },
+        { name: t('categories'), href: '/categories', icon: FolderTree },
+        { name: t('products'), href: '/products', icon: ShoppingBag },
+        { name: t('orders'), href: '/orders', icon: ShoppingCart },
+        { name: t('users'), href: '/users', icon: Users },
     ];
 
     return (
@@ -58,10 +62,10 @@ export const DashboardLayout: React.FC = () => {
             )}
 
             {/* Sidebar */}
-            <aside className={`w-72 bg-white/90 backdrop-blur-3xl border-r border-slate-200/60 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-500 ease-[cubic-bezier(0.16, 1, 0.3, 1)] 
+            <aside className={`w-72 bg-white/95 backdrop-blur-3xl border-r border-slate-200/60 flex flex-col fixed inset-y-0 left-0 z-50 shadow-2xl lg:shadow-none transition-transform duration-500 ease-[cubic-bezier(0.16, 1, 0.3, 1)] 
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
 
-                <div className="h-24 flex items-center px-8 justify-between">
+                <div className="h-20 lg:h-24 flex items-center px-8 justify-between border-b lg:border-none border-slate-100/60">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-tr from-primary to-primary-light rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
                             <ShoppingBag className="w-6 h-6 text-white" />
@@ -78,7 +82,11 @@ export const DashboardLayout: React.FC = () => {
                     </button>
                 </div>
 
-                <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar">
+                <div className="px-6 py-6 border-b border-slate-100/60 lg:py-4 lg:border-none">
+                    <LanguageSwitcher />
+                </div>
+
+                <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto custom-scrollbar">
                     {navigation.map((item) => {
                         const isActive = location.pathname === item.href;
                         return (
@@ -86,14 +94,14 @@ export const DashboardLayout: React.FC = () => {
                                 key={item.name}
                                 to={item.href}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className={`group flex items-center px-4 py-3.5 text-sm font-semibold rounded-2xl transition-all duration-300 relative ${isActive
+                                className={`group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300 relative ${isActive
                                     ? 'bg-primary text-white shadow-xl shadow-primary/20'
                                     : 'text-slate-500 hover:bg-slate-50 hover:text-primary'
                                     }`}
                             >
-                                <item.icon className={`mr-3.5 h-5 w-5 transition-transform duration-300 ${isActive ? 'text-white scale-110' : 'text-slate-400 group-hover:text-primary'
+                                <item.icon className={`mr-3 h-5 w-5 transition-transform duration-300 ${isActive ? 'text-white scale-110' : 'text-slate-400 group-hover:text-primary'
                                     }`} />
-                                {item.name}
+                                <span className="flex-1">{item.name}</span>
                                 {isActive && (
                                     <span className="absolute right-4 w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                                 )}
@@ -103,8 +111,8 @@ export const DashboardLayout: React.FC = () => {
                 </nav>
 
                 <div className="p-6 mt-auto border-t border-slate-100/80 bg-slate-50/50">
-                    <div className="flex items-center gap-3 mb-6 p-2">
-                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold border-2 border-white shadow-sm">
+                    <div className="flex items-center gap-3 mb-4 p-2">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold border-2 border-white shadow-sm ring-4 ring-slate-100/50">
                             {user?.name?.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 truncate">
@@ -119,15 +127,23 @@ export const DashboardLayout: React.FC = () => {
                         onClick={logout}
                     >
                         <LogOut className="mr-3 h-5 w-5" />
-                        <span>Sign Out</span>
+                        <span>{t('logout')}</span>
                     </Button>
                 </div>
             </aside>
 
             {/* Main Content Area */}
             <div className="flex-1 lg:ml-72 min-h-screen flex flex-col pt-20 lg:pt-0">
-                <main className="flex-1 p-4 sm:p-6 lg:p-10 animate-fade-in">
-                    <div className="max-w-7xl mx-auto">
+                <header className="hidden lg:flex h-24 items-center justify-between px-10 bg-transparent">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        {navigation.find(n => n.href === location.pathname)?.name || t('dashboard')}
+                    </h2>
+                    <div className="flex items-center gap-4">
+                        {/* Optional header items */}
+                    </div>
+                </header>
+                <main className="flex-1 p-4 sm:p-6 lg:p-10 animate-fade-in overflow-x-hidden">
+                    <div className="max-w-7xl mx-auto w-full">
                         <Outlet />
                     </div>
                 </main>

@@ -15,6 +15,7 @@ type User struct {
 	Name         *string   `json:"name,omitempty"`
 	Phone        *string   `json:"phone,omitempty"`
 	Address      *string   `json:"address,omitempty"`
+	Language     *string   `json:"language,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 }
 
