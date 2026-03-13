@@ -8,7 +8,6 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export const ProtectedRoute: React.FC = () => {
     const { user, loading } = useAuth();
-    const { t } = useTranslation();
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-background">
