@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"backend/internal/models"
@@ -260,15 +261,33 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 
 	// If there's an image, send Photo instead
 	if prod.ImageURL != nil && *prod.ImageURL != "" {
-		imageURL := *prod.ImageURL
-		if strings.HasPrefix(imageURL, "/") {
-			imageURL = h.BackendURL + imageURL
+		origURL := *prod.ImageURL
+		var photo tgbotapi.PhotoConfig
+
+		// If it's a local upload, try sending as FilePath
+		if strings.HasPrefix(origURL, "/uploads/") {
+			localPath := "." + origURL // Assuming CWD is backend/
+			if _, err := os.Stat(localPath); err == nil {
+				photo = tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(localPath))
+			} else {
+				// Fallback to URL if file not found locally
+				photo = tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(h.BackendURL+origURL))
+			}
+		} else {
+			// Remote URL
+			photo = tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(origURL))
 		}
-		photo := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(imageURL))
+
 		photo.Caption = text
 		photo.ParseMode = "Markdown"
 		photo.ReplyMarkup = keyboard
-		h.Bot.Send(photo)
+
+		_, err := h.Bot.Send(photo)
+		if err != nil {
+			log.Printf("Error sending photo: %v", err)
+			// Fallback: send text if photo fails
+			h.Bot.Send(msg)
+		}
 	} else {
 		h.Bot.Send(msg)
 	}
