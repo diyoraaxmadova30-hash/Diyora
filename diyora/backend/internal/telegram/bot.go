@@ -148,11 +148,12 @@ func (h *BotHandler) StartListening() {
 
 func (h *BotHandler) handleMessage(msg *tgbotapi.Message) {
 	ctx := context.Background()
+	log.Printf("Received message from %s (ID: %d): %s", msg.From.UserName, msg.From.ID, msg.Text)
 
 	// Ensure User Exists
 	user, err := h.ensureUser(ctx, msg.From)
 	if err != nil {
-		log.Printf("Error ensuring user: %v", err)
+		log.Printf("Error ensuring user %d: %v", msg.From.ID, err)
 		return
 	}
 
@@ -218,15 +219,14 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 		if len(parts) > 1 {
 			prodID, _ := uuid.Parse(parts[1])
 			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
-			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "added_to_cart")))
-			h.showCartOptions(cb.Message.Chat.ID, user)
+			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
 		}
 
 	case "inc": // Increment Qty
 		if len(parts) > 1 {
 			prodID, _ := uuid.Parse(parts[1])
 			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
-			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
+			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
 		}
 
 	case "dec": // Decrement Qty
@@ -243,7 +243,7 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 					break
 				}
 			}
-			h.showProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
+			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user)
 		}
 
 	case "rm": // Remove from Cart
@@ -269,6 +269,7 @@ func (h *BotHandler) ensureUser(ctx context.Context, tgUser *tgbotapi.User) (*mo
 	uid := tgUser.ID
 	user, err := h.UserRepo.GetByTelegramID(ctx, uid)
 	if err != nil {
+		log.Printf("[DEBUG] DB Error in GetByTelegramID for user %d: %v", uid, err)
 		return nil, err
 	}
 	if user != nil {
@@ -298,12 +299,18 @@ func (h *BotHandler) replyText(chatID int64, text string) {
 }
 
 func (h *BotHandler) handleStartCmd(chatID int64, user *models.User) {
+	log.Printf("Handling /start for user: %d", user.TelegramID)
 	if user.Language == nil {
 		h.showLanguageSelection(chatID, user)
 		return
 	}
 
-	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "welcome", *user.Name))
+	userName := "User"
+	if user.Name != nil {
+		userName = *user.Name
+	}
+
+	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "welcome", userName))
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -379,15 +386,12 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user
 	h.Bot.Send(msg)
 }
 
-func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User) {
-	ctx := context.Background()
+func (h *BotHandler) getProductMessageData(ctx context.Context, prodID uuid.UUID, user *models.User) (*models.Product, string, tgbotapi.InlineKeyboardMarkup, error) {
 	prod, err := h.ProdRepo.GetByID(ctx, prodID)
 	if err != nil || prod == nil {
-		h.replyText(chatID, h.T(user, "err_loading"))
-		return
+		return nil, "", tgbotapi.InlineKeyboardMarkup{}, err
 	}
 
-	// Get current quantity in cart
 	qty := 0
 	cartItems, _ := h.CartRepo.GetCartItems(ctx, user.ID)
 	for _, item := range cartItems {
@@ -425,10 +429,21 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 				tgbotapi.NewInlineKeyboardButtonData("➕", "inc:"+prod.ID.String()),
 			),
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "view_cart"), "cart"),
+				tgbotapi.NewInlineKeyboardButtonData("🛒 "+h.T(user, "view_cart"), "cart"),
 				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
 			),
 		)
+	}
+
+	return prod, text, keyboard, nil
+}
+
+func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User) {
+	ctx := context.Background()
+	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user)
+	if err != nil {
+		h.replyText(chatID, h.T(user, "err_loading"))
+		return
 	}
 
 	// If there's an image, send Photo instead
@@ -460,6 +475,31 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = keyboard
 		h.Bot.Send(msg)
+	}
+}
+
+func (h *BotHandler) updateProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User) {
+	ctx := context.Background()
+	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user)
+	if err != nil {
+		h.replyText(chatID, h.T(user, "err_loading"))
+		return
+	}
+
+	if prod.ImageURL != nil && *prod.ImageURL != "" {
+		edit := tgbotapi.NewEditMessageCaption(chatID, msgID, text)
+		edit.ParseMode = "Markdown"
+		edit.ReplyMarkup = &keyboard
+		if _, err := h.Bot.Send(edit); err != nil {
+			log.Printf("Error editing product caption: %v", err)
+		}
+	} else {
+		edit := tgbotapi.NewEditMessageText(chatID, msgID, text)
+		edit.ParseMode = "Markdown"
+		edit.ReplyMarkup = &keyboard
+		if _, err := h.Bot.Send(edit); err != nil {
+			log.Printf("Error editing product text: %v", err)
+		}
 	}
 }
 
