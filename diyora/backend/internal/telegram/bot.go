@@ -498,7 +498,7 @@ func (h *BotHandler) updateProductDetails(cb *tgbotapi.CallbackQuery, prodID uui
 	chatID := cb.Message.Chat.ID
 	msgID := cb.Message.MessageID
 
-	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user, displayQty)
+	_, text, keyboard, err := h.getProductMessageData(ctx, prodID, user, displayQty)
 	if err != nil {
 		h.replyText(chatID, h.T(user, "err_loading"))
 		return
