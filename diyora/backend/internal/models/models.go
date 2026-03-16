@@ -30,6 +30,7 @@ type Product struct {
 	Name        string    `json:"name"`
 	Description *string   `json:"description,omitempty"`
 	Price       float64   `json:"price"`
+	Stock       int       `json:"stock"`
 	ImageURL    *string   `json:"image_url,omitempty"`
 	CategoryID  uuid.UUID `json:"category_id"`
 	CreatedAt   time.Time `json:"created_at"`

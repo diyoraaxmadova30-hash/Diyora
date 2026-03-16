@@ -20,6 +20,7 @@ export const Products: React.FC = () => {
         name: '',
         description: '',
         price: '',
+        stock: '',
         category_id: '',
         image_url: '',
     });
@@ -66,6 +67,7 @@ export const Products: React.FC = () => {
             const payload = {
                 ...formData,
                 price: parseFloat(formData.price),
+                stock: parseInt(formData.stock, 10),
             };
 
             if (editId) {
@@ -107,6 +109,7 @@ export const Products: React.FC = () => {
             name: prod.name,
             description: prod.description || '',
             price: prod.price.toString(),
+            stock: prod.stock ? prod.stock.toString() : '0',
             category_id: prod.category_id,
             image_url: prod.image_url || '',
         });
@@ -115,7 +118,7 @@ export const Products: React.FC = () => {
 
     const resetForm = () => {
         setEditId(null);
-        setFormData({ name: '', description: '', price: '', category_id: '', image_url: '' });
+        setFormData({ name: '', description: '', price: '', stock: '', category_id: '', image_url: '' });
     };
 
     const filteredProducts = products.filter(p =>
@@ -170,6 +173,7 @@ export const Products: React.FC = () => {
                                 <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Product Details</th>
                                 <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Category</th>
                                 <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Price</th>
+                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Stock</th>
                                 <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -200,6 +204,11 @@ export const Products: React.FC = () => {
                                         </td>
                                         <td className="px-6 lg:px-8 py-4 lg:py-5">
                                             <p className="font-black text-slate-900 tracking-tight">${parseFloat(prod.price).toFixed(2)}</p>
+                                        </td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
+                                            <Badge variant={prod.stock > 0 ? "success" : "danger"} className="py-1 px-3 text-[10px] font-black tracking-widest uppercase">
+                                                {prod.stock > 0 ? `${prod.stock} In Stock` : 'Out of Stock'}
+                                            </Badge>
                                         </td>
                                         <td className="px-6 lg:px-8 py-4 lg:py-5">
                                             <div className="flex items-center justify-end gap-1.5 lg:gap-2">
@@ -252,7 +261,7 @@ export const Products: React.FC = () => {
                         placeholder="e.g. Premium Espresso Roast"
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2 ml-1 uppercase tracking-widest">Category</label>
                             <select
@@ -272,6 +281,13 @@ export const Products: React.FC = () => {
                             value={formData.price}
                             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                             placeholder="0.00"
+                        />
+                        <Input
+                            label="Stock Quantity"
+                            type="number" step="1" required min="0"
+                            value={formData.stock}
+                            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                            placeholder="0"
                         />
                     </div>
 

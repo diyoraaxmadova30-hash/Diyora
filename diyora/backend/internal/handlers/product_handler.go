@@ -7,6 +7,7 @@ import (
 	"backend/internal/middleware"
 	"backend/internal/models"
 	"backend/internal/repositories"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,7 @@ type ProductRequest struct {
 	Name        string    `json:"name" binding:"required"`
 	Description *string   `json:"description"`
 	Price       float64   `json:"price" binding:"required,gt=0"`
+	Stock       int       `json:"stock"`
 	ImageURL    *string   `json:"image_url"`
 	CategoryID  uuid.UUID `json:"category_id" binding:"required"`
 }
@@ -47,11 +49,11 @@ func (h *ProductHandler) GetAll(c *gin.Context) {
 		middleware.RespondError(c, http.StatusInternalServerError, err)
 		return
 	}
-	
+
 	if products == nil {
 		products = []models.Product{}
 	}
-	
+
 	middleware.RespondSuccess(c, products)
 }
 
@@ -86,6 +88,7 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
+		Stock:       req.Stock,
 		ImageURL:    req.ImageURL,
 		CategoryID:  req.CategoryID,
 	}
@@ -116,6 +119,7 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
+		Stock:       req.Stock,
 		ImageURL:    req.ImageURL,
 		CategoryID:  req.CategoryID,
 	}

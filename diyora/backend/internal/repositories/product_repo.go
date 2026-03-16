@@ -23,16 +23,16 @@ func (r *ProductRepo) Create(ctx context.Context, p *models.Product) error {
 	if p.ID == uuid.Nil {
 		p.ID = uuid.New()
 	}
-	query := `INSERT INTO products (id, name, description, price, image_url, category_id) 
-	          VALUES ($1, $2, $3, $4, $5, $6) RETURNING created_at`
-	return r.DB.QueryRowContext(ctx, query, p.ID, p.Name, p.Description, p.Price, p.ImageURL, p.CategoryID).Scan(&p.CreatedAt)
+	query := `INSERT INTO products (id, name, description, price, stock, image_url, category_id) 
+	          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING created_at`
+	return r.DB.QueryRowContext(ctx, query, p.ID, p.Name, p.Description, p.Price, p.Stock, p.ImageURL, p.CategoryID).Scan(&p.CreatedAt)
 }
 
 func (r *ProductRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.Product, error) {
-	query := `SELECT id, name, description, price, image_url, category_id, created_at FROM products WHERE id = $1`
+	query := `SELECT id, name, description, price, stock, image_url, category_id, created_at FROM products WHERE id = $1`
 	var p models.Product
 	err := r.DB.QueryRowContext(ctx, query, id).Scan(
-		&p.ID, &p.Name, &p.Description, &p.Price, &p.ImageURL, &p.CategoryID, &p.CreatedAt,
+		&p.ID, &p.Name, &p.Description, &p.Price, &p.Stock, &p.ImageURL, &p.CategoryID, &p.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -44,7 +44,7 @@ func (r *ProductRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.Produc
 }
 
 func (r *ProductRepo) GetAll(ctx context.Context, categoryID *uuid.UUID, searchQuery string, limit, offset int) ([]models.Product, error) {
-	baseQuery := `SELECT id, name, description, price, image_url, category_id, created_at FROM products WHERE 1=1`
+	baseQuery := `SELECT id, name, description, price, stock, image_url, category_id, created_at FROM products WHERE 1=1`
 	var args []interface{}
 	argCount := 1
 
@@ -72,7 +72,7 @@ func (r *ProductRepo) GetAll(ctx context.Context, categoryID *uuid.UUID, searchQ
 	var products []models.Product
 	for rows.Next() {
 		var p models.Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.ImageURL, &p.CategoryID, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.Stock, &p.ImageURL, &p.CategoryID, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		products = append(products, p)
@@ -81,8 +81,8 @@ func (r *ProductRepo) GetAll(ctx context.Context, categoryID *uuid.UUID, searchQ
 }
 
 func (r *ProductRepo) Update(ctx context.Context, p *models.Product) error {
-	query := `UPDATE products SET name = $1, description = $2, price = $3, image_url = $4, category_id = $5 WHERE id = $6`
-	_, err := r.DB.ExecContext(ctx, query, p.Name, p.Description, p.Price, p.ImageURL, p.CategoryID, p.ID)
+	query := `UPDATE products SET name = $1, description = $2, price = $3, stock = $4, image_url = $5, category_id = $6 WHERE id = $7`
+	_, err := r.DB.ExecContext(ctx, query, p.Name, p.Description, p.Price, p.Stock, p.ImageURL, p.CategoryID, p.ID)
 	return err
 }
 

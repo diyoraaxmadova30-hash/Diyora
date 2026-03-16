@@ -3,8 +3,11 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"backend/internal/models"
+
 	"github.com/google/uuid"
 )
 
@@ -46,7 +49,18 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, userID uuid.UUID, address s
 
 	// Insert order items
 	itemQuery := `INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4, $5)`
+	stockQuery := `UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1 RETURNING id`
+
 	for _, item := range cartItems {
+		var updatedID uuid.UUID
+		err := tx.QueryRowContext(ctx, stockQuery, item.Quantity, item.ProductID).Scan(&updatedID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, fmt.Errorf("insufficient stock for product %s", item.Product.Name)
+			}
+			return nil, err
+		}
+
 		if _, err := tx.ExecContext(ctx, itemQuery, uuid.New(), order.ID, item.ProductID, item.Quantity, item.Product.Price); err != nil {
 			return nil, err
 		}
@@ -109,7 +123,7 @@ func (r *OrderRepo) GetOrderItems(ctx context.Context, orderID uuid.UUID) ([]mod
 		FROM order_items oi
 		JOIN products p ON oi.product_id = p.id
 		WHERE oi.order_id = $1`
-		
+
 	rows, err := r.DB.QueryContext(ctx, query, orderID)
 	if err != nil {
 		return nil, err

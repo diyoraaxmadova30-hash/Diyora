@@ -41,6 +41,7 @@ var translations = map[string]map[string]string{
 		"unknown_cmd":       "❓ Unknown command. Try /start",
 		"start_browse":      "👋 Send /start to browse the shop!",
 		"remove":            "❌ Remove",
+		"out_of_stock":      "⚠️ Not enough stock available.",
 	},
 	"uz": {
 		"welcome":           "Do'konga xush kelibsiz, *%s*!\nNima qilmoqchisiz?",
@@ -67,6 +68,7 @@ var translations = map[string]map[string]string{
 		"unknown_cmd":       "❓ Noma'lum buyruq. /start ni bosing",
 		"start_browse":      "👋 Xarid qilish uchun /start ni bosing!",
 		"remove":            "❌ O'chirish",
+		"out_of_stock":      "⚠️ Zaxira yetarli emas.",
 	},
 	"ru": {
 		"welcome":           "Добро пожаловать в магазин, *%s*!\nЧто бы вы хотели сделать?",
@@ -93,6 +95,7 @@ var translations = map[string]map[string]string{
 		"unknown_cmd":       "❓ Неизвестная команда. Попробуйте /start",
 		"start_browse":      "👋 Отправьте /start, чтобы просмотреть магазин!",
 		"remove":            "❌ Удалить",
+		"out_of_stock":      "⚠️ Недостаточно товара в наличии.",
 	},
 }
 
@@ -221,6 +224,10 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 			prodID, _ := uuid.Parse(parts[1])
 			qty, _ := strconv.Atoi(parts[2])
 			qty++
+			prod, _ := h.ProdRepo.GetByID(ctx, prodID)
+			if prod != nil && qty > prod.Stock {
+				qty = prod.Stock
+			}
 			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty)
 		}
 
@@ -238,6 +245,20 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 		if len(parts) > 2 {
 			prodID, _ := uuid.Parse(parts[1])
 			qty, _ := strconv.Atoi(parts[2])
+
+			items, _ := h.CartRepo.GetCartItems(ctx, user.ID)
+			currentQty := 0
+			for _, it := range items {
+				if it.ProductID == prodID {
+					currentQty = it.Quantity
+				}
+			}
+			prod, _ := h.ProdRepo.GetByID(ctx, prodID)
+			if prod != nil && currentQty+qty > prod.Stock {
+				h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "out_of_stock")))
+				return
+			}
+
 			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, qty)
 			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "added_to_cart")))
 			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty) // Just refresh to keep same qty showing
@@ -389,31 +410,45 @@ func (h *BotHandler) getProductMessageData(ctx context.Context, prodID uuid.UUID
 		return nil, "", tgbotapi.InlineKeyboardMarkup{}, err
 	}
 
+	if displayQty > prod.Stock {
+		displayQty = prod.Stock
+	}
 	if displayQty < 1 {
 		displayQty = 1
 	}
 
 	totalPrice := prod.Price * float64(displayQty)
 
-	text := fmt.Sprintf("📦 *%s*\n\nЦена: %.0f UZS\nКоличество: %d\nИтого: %.0f UZS", prod.Name, prod.Price, displayQty, totalPrice)
+	text := fmt.Sprintf("📦 *%s*\n\nЦена: %.0f UZS\nКоличество: %d\nВ наличии: %d\nИтого: %.0f UZS", prod.Name, prod.Price, displayQty, prod.Stock, totalPrice)
 	if prod.Description != nil && *prod.Description != "" {
 		text += fmt.Sprintf("\n\n%s", *prod.Description)
 	}
 
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("-", fmt.Sprintf("p_dec:%s:%d", prod.ID.String(), displayQty)),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", displayQty), "none"),
-			tgbotapi.NewInlineKeyboardButtonData("+", fmt.Sprintf("p_inc:%s:%d", prod.ID.String(), displayQty)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "add_to_cart"), fmt.Sprintf("p_add:%s:%d", prod.ID.String(), displayQty)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️ "+h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
-			tgbotapi.NewInlineKeyboardButtonData("🛒 "+h.T(user, "view_cart"), "cart"),
-		),
-	)
+	var keyboard tgbotapi.InlineKeyboardMarkup
+	if prod.Stock <= 0 {
+		text += "\n\n" + h.T(user, "out_of_stock")
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("⬅️ "+h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
+				tgbotapi.NewInlineKeyboardButtonData("🛒 "+h.T(user, "view_cart"), "cart"),
+			),
+		)
+	} else {
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("-", fmt.Sprintf("p_dec:%s:%d", prod.ID.String(), displayQty)),
+				tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", displayQty), "none"),
+				tgbotapi.NewInlineKeyboardButtonData("+", fmt.Sprintf("p_inc:%s:%d", prod.ID.String(), displayQty)),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(h.T(user, "add_to_cart"), fmt.Sprintf("p_add:%s:%d", prod.ID.String(), displayQty)),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("⬅️ "+h.T(user, "back_to_cat"), "cat:"+prod.CategoryID.String()),
+				tgbotapi.NewInlineKeyboardButtonData("🛒 "+h.T(user, "view_cart"), "cart"),
+			),
+		)
+	}
 
 	return prod, text, keyboard, nil
 }
