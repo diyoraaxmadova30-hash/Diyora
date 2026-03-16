@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { Plus, Pencil, Trash2, Image as ImageIcon, Search, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image as ImageIcon, Search, Filter, Package } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
@@ -144,89 +144,85 @@ export const Products: React.FC = () => {
                 </Button>
             </header>
 
-            <Card className="p-0 overflow-hidden border-none shadow-xl shadow-slate-200/50">
-                <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
-                    <div className="w-full md:max-w-md">
-                        <Input
-                            placeholder="Search products..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            icon={<Search className="w-5 h-5 text-slate-400" />}
-                            className="bg-slate-50/50 border-none ring-1 ring-slate-100"
-                        />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                {/* Search Sidebar */}
+                <Card className="lg:col-span-1 h-fit lg:sticky lg:top-8 border-none shadow-xl shadow-slate-200/50">
+                    <div className="mb-6 px-2">
+                        <h3 className="text-lg font-bold text-slate-900 mb-1">Quick Search</h3>
+                        <p className="text-sm text-slate-500">Find products by name.</p>
                     </div>
-                    <div className="flex items-center gap-2 w-full md:w-auto">
-                        <Button variant="outline" size="sm" className="h-10 flex-1 md:flex-none border-slate-100 hover:bg-slate-50 rounded-xl">
-                            <Filter className="w-4 h-4 mr-2" />
-                            Filters
-                        </Button>
-                        <p className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-100 uppercase tracking-widest whitespace-nowrap">
-                            {filteredProducts.length} Products
-                        </p>
+                    <Input
+                        placeholder="Search products..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        icon={<Search className="w-5 h-5 text-slate-400" />}
+                        className="bg-slate-50/50 border-none ring-1 ring-slate-100"
+                    />
+                    <div className="mt-8 pt-8 border-t border-slate-50">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-3 text-primary bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                <Package className="w-5 h-5" />
+                                <span className="text-xs font-black uppercase tracking-widest">{filteredProducts.length} Products</span>
+                            </div>
+                            <Button variant="outline" className="w-full border-slate-100 hover:bg-slate-50 rounded-xl">
+                                <Filter className="w-4 h-4 mr-2" />
+                                More Filters
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                </Card>
 
-                <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left min-w-[700px] lg:min-w-full">
-                        <thead className="bg-slate-50/50">
-                            <tr>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Product Details</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Category</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Price</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Stock</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredProducts.map((prod) => {
-                                const cat = categories.find(c => c.id === prod.category_id);
-                                return (
-                                    <tr key={prod.id} className="hover:bg-slate-50/30 transition-colors group">
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                            <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
-                                                <div className="w-12 h-12 lg:w-14 lg:h-14 bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 group-hover:shadow-lg group-hover:scale-105 transition-all duration-300 flex-shrink-0">
-                                                    {prod.image_url ? (
-                                                        <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${prod.image_url}`} alt={prod.name} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <ImageIcon className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300" />
-                                                    )}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="font-bold text-slate-900 truncate">{prod.name}</p>
-                                                    <p className="text-xs lg:text-sm text-slate-400 truncate max-w-[150px] lg:max-w-xs">{prod.description || 'No description'}</p>
-                                                </div>
+                {/* Product List */}
+                <div className="lg:col-span-2 space-y-4">
+                    {filteredProducts.map((prod) => {
+                        const cat = categories.find(c => c.id === prod.category_id);
+                        return (
+                            <Card key={prod.id} className="group hover:bg-slate-50/30 transition-all duration-300 p-4 lg:p-6 border-none shadow-lg shadow-slate-200/40">
+                                <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 lg:w-20 lg:h-20 bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 group-hover:shadow-lg group-hover:scale-105 transition-all duration-300 flex-shrink-0">
+                                            {prod.image_url ? (
+                                                <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${prod.image_url}`} alt={prod.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <ImageIcon className="w-6 h-6 lg:w-8 lg:h-8 text-slate-300" />
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col justify-center min-w-0">
+                                            <div className="flex flex-wrap items-center gap-1.5 lg:gap-2 mb-1.5">
+                                                <Badge variant="info" className="py-0.5 px-2 text-[8px] lg:text-[10px] font-black tracking-widest uppercase truncate max-w-[120px]">
+                                                    {cat?.name || 'Uncategorized'}
+                                                </Badge>
+                                                <Badge variant={prod.stock > 0 ? "success" : "danger"} className="py-0.5 px-2 text-[8px] lg:text-[10px] font-black tracking-widest uppercase whitespace-nowrap">
+                                                    {prod.stock > 0 ? `${prod.stock} In Stock` : 'Out of Stock'}
+                                                </Badge>
                                             </div>
-                                        </td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                            <Badge variant="info" className="py-1 px-3 text-[10px] font-black tracking-widest uppercase">
-                                                {cat?.name || 'Uncategorized'}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                            <p className="font-black text-slate-900 tracking-tight">${parseFloat(prod.price).toFixed(2)}</p>
-                                        </td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                            <Badge variant={prod.stock > 0 ? "success" : "danger"} className="py-1 px-3 text-[10px] font-black tracking-widest uppercase">
-                                                {prod.stock > 0 ? `${prod.stock} In Stock` : 'Out of Stock'}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                            <div className="flex items-center justify-end gap-1.5 lg:gap-2">
-                                                <Button variant="ghost" size="sm" onClick={() => openEdit(prod)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-indigo-600 hover:bg-indigo-50 rounded-xl">
-                                                    <Pencil className="w-4 h-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="sm" onClick={() => handleDelete(prod.id)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-accent hover:bg-accent/10 rounded-xl">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            <h3 className="text-base lg:text-lg font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{prod.name}</h3>
+                                            <p className="font-black text-slate-900 tracking-tight text-lg mt-0.5">${parseFloat(prod.price).toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100/60">
+                                        <div className="flex items-center gap-2">
+                                            <Button variant="ghost" size="sm" onClick={() => openEdit(prod)} className="w-10 h-10 p-0 text-indigo-600 hover:bg-indigo-50 rounded-xl">
+                                                <Pencil className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(prod.id)} className="w-10 h-10 p-0 text-accent hover:bg-accent/10 rounded-xl">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        );
+                    })}
+
+                    {filteredProducts.length === 0 && (
+                        <div className="text-center py-20 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">
+                            <ImageIcon className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No products found</p>
+                        </div>
+                    )}
                 </div>
-            </Card>
+            </div>
 
             <Modal
                 isOpen={isModalOpen}

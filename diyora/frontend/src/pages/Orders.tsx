@@ -74,98 +74,101 @@ export const Orders: React.FC = () => {
         <div className="space-y-6 lg:space-y-10 animate-fade-in overflow-x-hidden">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Orders Management</h1>
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Orders</h1>
                     <p className="text-sm lg:text-base text-slate-500 font-medium">Track and process your store's transactions.</p>
                 </div>
             </header>
 
-            <Card className="p-0 overflow-hidden border-none shadow-xl shadow-slate-200/50">
-                <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
-                    <div className="w-full md:max-w-md">
-                        <Input
-                            placeholder="Search by Order ID..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            icon={<Search className="w-5 h-5 text-slate-400" />}
-                            className="bg-slate-50/50 border-none ring-1 ring-slate-100"
-                        />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                {/* Search Sidebar */}
+                <Card className="lg:col-span-1 h-fit lg:sticky lg:top-8 border-none shadow-xl shadow-slate-200/50">
+                    <div className="mb-6 px-2">
+                        <h3 className="text-lg font-bold text-slate-900 mb-1">Search Orders</h3>
+                        <p className="text-sm text-slate-500">Filter orders by ID or status.</p>
                     </div>
-                    <div className="flex items-center gap-2 w-full md:w-auto">
-                        <Button variant="outline" size="sm" className="h-10 flex-1 md:flex-none border-slate-100 hover:bg-slate-50 rounded-xl">
-                            <Filter className="w-4 h-4 mr-2" />
-                            Filters
-                        </Button>
-                        <p className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-100 uppercase tracking-widest whitespace-nowrap">
-                            {filteredOrders.length} Orders
-                        </p>
+                    <Input
+                        placeholder="Search by Order ID..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        icon={<Search className="w-5 h-5 text-slate-400" />}
+                        className="bg-slate-50/50 border-none ring-1 ring-slate-100"
+                    />
+                    <div className="mt-8 pt-8 border-t border-slate-50">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-3 text-primary bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                <Package className="w-5 h-5" />
+                                <span className="text-xs font-black uppercase tracking-widest">{filteredOrders.length} Total Orders</span>
+                            </div>
+                            <Button variant="outline" className="w-full border-slate-100 hover:bg-slate-50 rounded-xl">
+                                <Filter className="w-4 h-4 mr-2" />
+                                Filters
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                </Card>
 
-                <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left min-w-[800px] lg:min-w-full">
-                        <thead className="bg-slate-50/50">
-                            <tr>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Order Information</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Time</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Total Price</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Current Status</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Update Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredOrders.map((order) => (
-                                <tr key={order.id} className="hover:bg-slate-50/30 transition-colors group">
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                        <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
-                                            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 group-hover:bg-primary group-hover:border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300 flex-shrink-0">
-                                                <Package className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400 group-hover:text-white transition-colors" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 font-mono tracking-tight text-sm truncate">#{order.id.substring(0, 8).toUpperCase()}</p>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Customer ID: {order.user_id.substring(0, 6)}</p>
+                {/* Orders List */}
+                <div className="lg:col-span-2 space-y-4">
+                    {filteredOrders.map((order) => (
+                        <Card key={order.id} className="group hover:bg-slate-50/30 transition-all duration-300 p-4 lg:p-6 border-none shadow-lg shadow-slate-200/40">
+                            <div className="flex flex-col gap-6">
+                                {/* Header: Order ID & Status */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 lg:w-14 lg:h-14 bg-white rounded-2xl flex items-center justify-center border border-slate-100 group-hover:bg-primary group-hover:border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300 flex-shrink-0">
+                                            <Package className="w-6 h-6 lg:w-7 lg:h-7 text-slate-400 group-hover:text-white transition-colors" />
+                                        </div>
+                                        <div>
+                                            <p className="font-mono font-bold text-slate-900 text-sm lg:text-base">#{order.id.substring(0, 8).toUpperCase()}</p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <Clock className="w-3 h-3 text-slate-400" />
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                    {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })} • {new Date(order.created_at).toLocaleTimeString(undefined, { timeStyle: 'short' })}
+                                                </p>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                        <div className="text-sm font-bold text-slate-700">
-                                            {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                                        </div>
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                            {new Date(order.created_at).toLocaleTimeString(undefined, { timeStyle: 'short' })}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                        <p className="font-black text-slate-900 tracking-tight text-lg">${order.total_price.toFixed(2)}</p>
-                                    </td>
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap">
-                                        <StatusBadge status={order.status} />
-                                    </td>
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5 text-right">
-                                        <select
-                                            className="bg-slate-50 border-none ring-1 ring-slate-100 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:bg-white text-center min-w-[120px]"
-                                            value={order.status}
-                                            onChange={(e) => updateStatus(order.id, e.target.value)}
-                                        >
-                                            <option value="pending">Pending</option>
-                                            <option value="paid">Paid</option>
-                                            <option value="shipped">Shipped</option>
-                                            <option value="completed">Completed</option>
-                                            <option value="canceled">Canceled</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                    <StatusBadge status={order.status} />
+                                </div>
 
-                {filteredOrders.length === 0 && (
-                    <div className="text-center py-20 bg-white">
-                        <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                        <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No orders found</p>
-                    </div>
-                )}
-            </Card>
+                                {/* Divider */}
+                                <div className="border-t border-slate-50"></div>
+
+                                {/* Footer: Price & Actions */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex flex-col">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+                                        <p className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">${order.total_price.toFixed(2)}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex flex-col flex-1 sm:flex-none">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Update Status</p>
+                                            <select
+                                                className="bg-slate-50 border-none ring-1 ring-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:bg-white min-w-[140px]"
+                                                value={order.status}
+                                                onChange={(e) => updateStatus(order.id, e.target.value)}
+                                            >
+                                                <option value="pending">Pending</option>
+                                                <option value="paid">Paid</option>
+                                                <option value="shipped">Shipped</option>
+                                                <option value="completed">Completed</option>
+                                                <option value="canceled">Canceled</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+
+                    {filteredOrders.length === 0 && (
+                        <div className="text-center py-20 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">
+                            <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No orders found</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };
