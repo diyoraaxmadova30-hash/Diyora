@@ -228,7 +228,7 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 			if prod != nil && qty > prod.Stock {
 				qty = prod.Stock
 			}
-			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty)
+			h.updateProductDetails(cb, prodID, user, qty)
 		}
 
 	case "p_dec": // Preview Decrement Qty
@@ -238,7 +238,7 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 			if qty > 1 {
 				qty--
 			}
-			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty)
+			h.updateProductDetails(cb, prodID, user, qty)
 		}
 
 	case "p_add": // Add to Cart from Preview
@@ -261,7 +261,7 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 
 			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, qty)
 			h.Bot.Request(tgbotapi.NewCallbackWithAlert(cb.ID, h.T(user, "added_to_cart")))
-			h.updateProductDetails(cb.Message.Chat.ID, cb.Message.MessageID, prodID, user, qty) // Just refresh to keep same qty showing
+			h.updateProductDetails(cb, prodID, user, qty) // Just refresh to keep same qty showing
 		}
 
 	case "rm": // Remove from Cart
@@ -493,15 +493,18 @@ func (h *BotHandler) showProductDetails(chatID int64, msgID int, prodID uuid.UUI
 	}
 }
 
-func (h *BotHandler) updateProductDetails(chatID int64, msgID int, prodID uuid.UUID, user *models.User, displayQty int) {
+func (h *BotHandler) updateProductDetails(cb *tgbotapi.CallbackQuery, prodID uuid.UUID, user *models.User, displayQty int) {
 	ctx := context.Background()
+	chatID := cb.Message.Chat.ID
+	msgID := cb.Message.MessageID
+
 	prod, text, keyboard, err := h.getProductMessageData(ctx, prodID, user, displayQty)
 	if err != nil {
 		h.replyText(chatID, h.T(user, "err_loading"))
 		return
 	}
 
-	if prod.ImageURL != nil && *prod.ImageURL != "" {
+	if cb.Message.Photo != nil && len(cb.Message.Photo) > 0 {
 		edit := tgbotapi.NewEditMessageCaption(chatID, msgID, text)
 		edit.ParseMode = "Markdown"
 		edit.ReplyMarkup = &keyboard
