@@ -106,74 +106,71 @@ export const Users: React.FC = () => {
                 </Button>
             </header>
 
-            <Card className="p-0 overflow-hidden border-none shadow-xl shadow-slate-200/50">
-                <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
-                    <div className="w-full md:max-w-md">
-                        <Input
-                            placeholder="Search by name or email..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            icon={<Search className="w-5 h-5 text-slate-400" />}
-                            className="bg-slate-50/50 border-none ring-1 ring-slate-100"
-                        />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                {/* Search Sidebar */}
+                <Card className="lg:col-span-1 h-fit lg:sticky lg:top-8 border-none shadow-xl shadow-slate-200/50">
+                    <div className="mb-6 px-2">
+                        <h3 className="text-lg font-bold text-slate-900 mb-1">Search Team</h3>
+                        <p className="text-sm text-slate-500">Find users by name or email.</p>
                     </div>
-                </div>
-
-                <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left min-w-[600px] lg:min-w-full">
-                        <thead className="bg-slate-50/50">
-                            <tr>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">User Details</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Role</th>
-                                <th className="px-6 lg:px-8 py-4 lg:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredUsers.map((user) => (
-                                <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                        <div className="flex items-center gap-3 lg:gap-4">
-                                            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border-2 border-white shadow-sm ring-2 ring-slate-50 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                                {user.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 truncate">{user.name}</p>
-                                                <p className="text-xs lg:text-sm text-slate-400 flex items-center gap-1.5 truncate">
-                                                    <Mail className="w-3 h-3" />
-                                                    {user.email}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                        <Badge variant={user.role === 'admin' ? 'danger' : 'primary'} className="py-1 px-3 text-[10px] font-black tracking-widest">
-                                            <Shield className="w-3 h-3 mr-1.5" />
-                                            <span className="uppercase">{user.role}</span>
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 lg:px-8 py-4 lg:py-5">
-                                        <div className="flex items-center justify-end gap-1.5 lg:gap-2">
-                                            <Button variant="ghost" size="sm" onClick={() => openEdit(user)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-indigo-600 hover:bg-indigo-50 rounded-xl">
-                                                <Pencil className="w-4 h-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(user.id)} className="w-9 h-9 lg:w-10 lg:h-10 p-0 text-accent hover:bg-accent/10 rounded-xl">
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {filteredUsers.length === 0 && (
-                    <div className="text-center py-20 bg-slate-50/50">
-                        <UsersIcon className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No users found</p>
+                    <Input
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        icon={<Search className="w-5 h-5 text-slate-400" />}
+                        className="bg-slate-50/50 border-none ring-1 ring-slate-100"
+                    />
+                    <div className="mt-8 pt-8 border-t border-slate-50">
+                        <div className="flex items-center gap-3 text-primary bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                            <UsersIcon className="w-5 h-5" />
+                            <span className="text-xs font-black uppercase tracking-widest">{filteredUsers.length} Total Users</span>
+                        </div>
                     </div>
-                )}
-            </Card>
+                </Card>
+
+                {/* Users List */}
+                <div className="lg:col-span-2 space-y-4">
+                    {filteredUsers.map((user) => (
+                        <Card key={user.id} className="group hover:bg-slate-50/30 transition-all duration-300 p-4 lg:p-6 border-none shadow-lg shadow-slate-200/40">
+                            <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-600 font-bold border border-slate-100 group-hover:bg-primary group-hover:text-white group-hover:border-primary group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300 flex-shrink-0">
+                                        {user.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                                            <h3 className="text-base lg:text-lg font-bold text-slate-900 truncate">{user.name}</h3>
+                                            <Badge variant={user.role === 'admin' ? 'danger' : 'primary'} className="py-0.5 px-2 text-[8px] lg:text-[10px] font-black tracking-widest uppercase">
+                                                <Shield className="w-2.5 h-2.5 mr-1" />
+                                                {user.role}
+                                            </Badge>
+                                        </div>
+                                        <p className="text-xs lg:text-sm text-slate-400 flex items-center gap-1.5 truncate">
+                                            <Mail className="w-3 h-3" />
+                                            {user.email}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-end gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100/60">
+                                    <Button variant="ghost" size="sm" onClick={() => openEdit(user)} className="w-10 h-10 p-0 text-indigo-600 hover:bg-indigo-50 rounded-xl">
+                                        <Pencil className="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(user.id)} className="w-10 h-10 p-0 text-accent hover:bg-accent/10 rounded-xl">
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+
+                    {filteredUsers.length === 0 && (
+                        <div className="text-center py-20 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">
+                            <UsersIcon className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No users found</p>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             <Modal
                 isOpen={isModalOpen}
