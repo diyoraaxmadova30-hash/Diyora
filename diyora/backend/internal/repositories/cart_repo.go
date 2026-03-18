@@ -26,7 +26,7 @@ func (r *CartRepo) EnsureCartExists(ctx context.Context, userID uuid.UUID) (uuid
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			cartID = uuid.New()
-			insertQuery := `INSERT INTO carts (id, user_id) VALUES ($1, $2)`
+			insertQuery := `INSERT INTO carts (id, user_id) VALUES ($1)`
 			if _, err := r.DB.ExecContext(ctx, insertQuery, cartID, userID); err != nil {
 				return uuid.Nil, err
 			}
