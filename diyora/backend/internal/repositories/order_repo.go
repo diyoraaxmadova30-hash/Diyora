@@ -80,7 +80,12 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, userID uuid.UUID, address s
 }
 
 func (r *OrderRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Order, error) {
-	query := `SELECT id, user_id, total_price, status, shipping_address, created_at FROM orders ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+	query := `
+		SELECT o.id, o.user_id, u.name, o.total_price, o.status, o.shipping_address, o.created_at 
+		FROM orders o
+		JOIN users u ON o.user_id = u.id
+		ORDER BY o.created_at DESC 
+		LIMIT $1 OFFSET $2`
 	rows, err := r.DB.QueryContext(ctx, query, limit, offset)
 	if err != nil {
 		return nil, err
@@ -90,7 +95,7 @@ func (r *OrderRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Ord
 	var orders []models.Order
 	for rows.Next() {
 		var o models.Order
-		if err := rows.Scan(&o.ID, &o.UserID, &o.TotalPrice, &o.Status, &o.ShippingAddress, &o.CreatedAt); err != nil {
+		if err := rows.Scan(&o.ID, &o.UserID, &o.UserName, &o.TotalPrice, &o.Status, &o.ShippingAddress, &o.CreatedAt); err != nil {
 			return nil, err
 		}
 		orders = append(orders, o)
@@ -99,7 +104,12 @@ func (r *OrderRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Ord
 }
 
 func (r *OrderRepo) GetUserOrders(ctx context.Context, userID uuid.UUID) ([]models.Order, error) {
-	query := `SELECT id, user_id, total_price, status, shipping_address, created_at FROM orders WHERE user_id = $1 ORDER BY created_at DESC`
+	query := `
+		SELECT o.id, o.user_id, u.name, o.total_price, o.status, o.shipping_address, o.created_at 
+		FROM orders o
+		JOIN users u ON o.user_id = u.id
+		WHERE o.user_id = $1 
+		ORDER BY o.created_at DESC`
 	rows, err := r.DB.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
@@ -109,7 +119,7 @@ func (r *OrderRepo) GetUserOrders(ctx context.Context, userID uuid.UUID) ([]mode
 	var orders []models.Order
 	for rows.Next() {
 		var o models.Order
-		if err := rows.Scan(&o.ID, &o.UserID, &o.TotalPrice, &o.Status, &o.ShippingAddress, &o.CreatedAt); err != nil {
+		if err := rows.Scan(&o.ID, &o.UserID, &o.UserName, &o.TotalPrice, &o.Status, &o.ShippingAddress, &o.CreatedAt); err != nil {
 			return nil, err
 		}
 		orders = append(orders, o)

@@ -120,6 +120,7 @@ export const Orders: React.FC = () => {
                                         </div>
                                         <div>
                                             <p className="font-mono font-bold text-slate-900 text-sm lg:text-base">#{order.id.substring(0, 8).toUpperCase()}</p>
+                                            <p className="text-xs font-medium text-slate-600 truncate max-w-[150px]">{order.user_name}</p>
                                             <div className="flex items-center gap-2 mt-0.5">
                                                 <Clock className="w-3 h-3 text-slate-400" />
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">

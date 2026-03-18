@@ -149,6 +149,7 @@ export const Users: React.FC = () => {
                                             <Mail className="w-3 h-3" />
                                             {user.email}
                                         </p>
+                                        <p className="font-mono text-[10px] text-slate-400 mt-1 uppercase tracking-tight">ID: {user.id}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-end gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100/60">

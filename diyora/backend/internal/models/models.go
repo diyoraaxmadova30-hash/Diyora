@@ -52,6 +52,7 @@ type CartItem struct {
 type Order struct {
 	ID              uuid.UUID `json:"id"`
 	UserID          uuid.UUID `json:"user_id"`
+	UserName        string    `json:"user_name,omitempty"` // For joining queries
 	TotalPrice      float64   `json:"total_price"`
 	Status          string    `json:"status"`
 	ShippingAddress *string   `json:"shipping_address,omitempty"`
