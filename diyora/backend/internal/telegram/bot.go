@@ -122,6 +122,7 @@ type BotHandler struct {
 	CartRepo   *repositories.CartRepo
 	OrderRepo  *repositories.OrderRepo
 	BackendURL string
+	navMsgIDs  map[int64]int
 }
 
 func NewBotHandler(bot *tgbotapi.BotAPI, uRepo *repositories.UserRepo, cRepo *repositories.CategoryRepo, pRepo *repositories.ProductRepo, cartRepo *repositories.CartRepo, oRepo *repositories.OrderRepo, backendURL string) *BotHandler {
@@ -133,7 +134,15 @@ func NewBotHandler(bot *tgbotapi.BotAPI, uRepo *repositories.UserRepo, cRepo *re
 		CartRepo:   cartRepo,
 		OrderRepo:  oRepo,
 		BackendURL: backendURL,
+		navMsgIDs:  make(map[int64]int),
 	}
+}
+
+func (h *BotHandler) updateNavMessage(chatID int64, newMsgID int) {
+	if oldID, ok := h.navMsgIDs[chatID]; ok && oldID != newMsgID {
+		h.Bot.Send(tgbotapi.NewDeleteMessage(chatID, oldID))
+	}
+	h.navMsgIDs[chatID] = newMsgID
 }
 
 func (h *BotHandler) StartListening() {
@@ -153,6 +162,8 @@ func (h *BotHandler) StartListening() {
 func (h *BotHandler) handleMessage(msg *tgbotapi.Message) {
 	ctx := context.Background()
 	log.Printf("Received message from %s (ID: %d): %s", msg.From.UserName, msg.From.ID, msg.Text)
+	// Delete user message to keep chat clean
+	h.Bot.Send(tgbotapi.NewDeleteMessage(msg.Chat.ID, msg.MessageID))
 
 	// Ensure User Exists
 	user, err := h.ensureUser(ctx, msg.From)
@@ -264,7 +275,21 @@ func (h *BotHandler) handleCallback(cb *tgbotapi.CallbackQuery) {
 			h.updateProductDetails(cb, prodID, user, qty) // Just refresh to keep same qty showing
 		}
 
-	case "rm": // Remove from Cart
+	case "c_inc": // In-cart Increment Qty
+		if len(parts) > 1 {
+			prodID, _ := uuid.Parse(parts[1])
+			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, 1)
+			h.showCart(cb.Message.Chat.ID, cb.Message.MessageID, user)
+		}
+
+	case "c_dec": // In-cart Decrement Qty
+		if len(parts) > 1 {
+			prodID, _ := uuid.Parse(parts[1])
+			h.CartRepo.AddOrUpdateItem(ctx, cartID, prodID, -1)
+			h.showCart(cb.Message.Chat.ID, cb.Message.MessageID, user)
+		}
+
+	case "rm": // Remove from Cart (Legacy, keep if needed or replace)
 		if len(parts) > 1 {
 			prodID, _ := uuid.Parse(parts[1])
 			h.CartRepo.RemoveItem(ctx, cartID, prodID)
@@ -313,7 +338,10 @@ func (h *BotHandler) ensureUser(ctx context.Context, tgUser *tgbotapi.User) (*mo
 
 func (h *BotHandler) replyText(chatID int64, text string) {
 	msg := tgbotapi.NewMessage(chatID, text)
-	h.Bot.Send(msg)
+	sent, err := h.Bot.Send(msg)
+	if err == nil {
+		h.updateNavMessage(chatID, sent.MessageID)
+	}
 }
 
 func (h *BotHandler) handleStartCmd(chatID int64, user *models.User) {
@@ -337,7 +365,10 @@ func (h *BotHandler) handleStartCmd(chatID int64, user *models.User) {
 		),
 	)
 	msg.ReplyMarkup = keyboard
-	h.Bot.Send(msg)
+	sent, err := h.Bot.Send(msg)
+	if err == nil {
+		h.updateNavMessage(chatID, sent.MessageID)
+	}
 }
 
 func (h *BotHandler) showLanguageSelection(chatID int64, user *models.User) {
@@ -350,7 +381,10 @@ func (h *BotHandler) showLanguageSelection(chatID int64, user *models.User) {
 		),
 	)
 	msg.ReplyMarkup = keyboard
-	h.Bot.Send(msg)
+	sent, err := h.Bot.Send(msg)
+	if err == nil {
+		h.updateNavMessage(chatID, sent.MessageID)
+	}
 }
 
 func (h *BotHandler) showCategories(chatID int64, msgID int, user *models.User) {
@@ -371,7 +405,10 @@ func (h *BotHandler) showCategories(chatID int64, msgID int, user *models.User) 
 	msg := tgbotapi.NewMessage(chatID, h.T(user, "choose_cat"))
 	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(rows...)
-	h.Bot.Send(msg)
+	sent, err := h.Bot.Send(msg)
+	if err == nil {
+		h.updateNavMessage(chatID, sent.MessageID)
+	}
 }
 
 func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user *models.User) {
@@ -401,7 +438,10 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user
 	msg := tgbotapi.NewMessage(chatID, h.T(user, "products"))
 	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(rows...)
-	h.Bot.Send(msg)
+	sent, err := h.Bot.Send(msg)
+	if err == nil {
+		h.updateNavMessage(chatID, sent.MessageID)
+	}
 }
 
 func (h *BotHandler) getProductMessageData(ctx context.Context, prodID uuid.UUID, user *models.User, displayQty int) (*models.Product, string, tgbotapi.InlineKeyboardMarkup, error) {
@@ -558,7 +598,9 @@ func (h *BotHandler) showCart(chatID int64, msgID int, user *models.User) {
 		text += fmt.Sprintf("▪️ %s (x%d) - $%.2f\n", item.Product.Name, item.Quantity, sub)
 
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(h.T(user, "remove")+" "+item.Product.Name[:min(len(item.Product.Name), 10)], "rm:"+item.Product.ID.String()),
+			tgbotapi.NewInlineKeyboardButtonData("-", "c_dec:"+item.Product.ID.String()),
+			tgbotapi.NewInlineKeyboardButtonData(item.Product.Name[:min(len(item.Product.Name), 12)]+fmt.Sprintf(" (%d)", item.Quantity), "none"),
+			tgbotapi.NewInlineKeyboardButtonData("+", "c_inc:"+item.Product.ID.String()),
 		))
 	}
 
@@ -571,8 +613,24 @@ func (h *BotHandler) showCart(chatID int64, msgID int, user *models.User) {
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = "Markdown"
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(rows...)
-	h.Bot.Send(msg)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+	msg.ReplyMarkup = keyboard
+
+	if msgID > 0 {
+		edit := tgbotapi.NewEditMessageText(chatID, msgID, text)
+		edit.ParseMode = "Markdown"
+		edit.ReplyMarkup = &keyboard
+		_, err := h.Bot.Send(edit)
+		if err == nil {
+			h.updateNavMessage(chatID, msgID)
+			return
+		}
+	}
+
+	sent, err := h.Bot.Send(msg)
+	if err == nil {
+		h.updateNavMessage(chatID, sent.MessageID)
+	}
 }
 
 func (h *BotHandler) handleCheckout(chatID int64, user *models.User, cartID uuid.UUID) {
@@ -591,7 +649,10 @@ func (h *BotHandler) handleCheckout(chatID int64, user *models.User, cartID uuid
 		return
 	}
 
-	h.replyText(chatID, h.Tf(user, "order_placed", order.ID, order.TotalPrice, order.Status))
+	// Send persistent order confirmation
+	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "order_placed", order.ID, order.TotalPrice, order.Status))
+	msg.ParseMode = "Markdown"
+	h.Bot.Send(msg)
 }
 
 func min(a, b int) int {
