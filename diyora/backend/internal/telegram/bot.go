@@ -650,7 +650,8 @@ func (h *BotHandler) handleCheckout(chatID int64, user *models.User, cartID uuid
 	}
 
 	// Send persistent order confirmation
-	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "order_placed", order.ID, order.TotalPrice, order.Status))
+	shortID := "#" + strings.ToUpper(order.ID.String()[:8])
+	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "order_placed", shortID, order.TotalPrice, order.Status))
 	msg.ParseMode = "Markdown"
 	h.Bot.Send(msg)
 }
