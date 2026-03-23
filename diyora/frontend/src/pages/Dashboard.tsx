@@ -48,7 +48,7 @@ export const Dashboard: React.FC = () => {
     }, []);
 
     const cards = [
-        { name: t('totalRevenue'), value: `$${stats.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/10', trend: '+12.5%' },
+        { name: t('totalRevenue'), value: `${stats.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} so'm`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/10', trend: '+12.5%' },
         { name: t('totalOrders'), value: stats.orders, icon: ShoppingBag, color: 'text-indigo-600', bg: 'bg-indigo-500/10', trend: '+8.2%' },
         { name: t('totalProducts'), value: stats.products, icon: Package, color: 'text-purple-600', bg: 'bg-purple-500/10', trend: '+3.1%' },
         { name: t('totalUsers'), value: stats.users, icon: Users, color: 'text-rose-600', bg: 'bg-rose-500/10', trend: '+15.4%' },

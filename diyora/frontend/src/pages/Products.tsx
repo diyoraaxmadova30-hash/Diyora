@@ -197,7 +197,7 @@ export const Products: React.FC = () => {
                                                 </Badge>
                                             </div>
                                             <h3 className="text-base lg:text-lg font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{prod.name}</h3>
-                                            <p className="font-black text-slate-900 tracking-tight text-lg mt-0.5">${parseFloat(prod.price).toFixed(2)}</p>
+                                            <p className="font-black text-slate-900 tracking-tight text-lg mt-0.5">{parseFloat(prod.price).toFixed(2)} so'm</p>
                                         </div>
                                     </div>
                                     <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100/60">

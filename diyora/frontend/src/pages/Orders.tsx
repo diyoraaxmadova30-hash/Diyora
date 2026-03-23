@@ -139,7 +139,7 @@ export const Orders: React.FC = () => {
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex flex-col">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                        <p className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">${order.total_price.toFixed(2)}</p>
+                                        <p className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">{order.total_price.toFixed(2)} sum</p>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="flex flex-col flex-1 sm:flex-none">
