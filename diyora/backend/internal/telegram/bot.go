@@ -42,6 +42,7 @@ var translations = map[string]map[string]string{
 		"start_browse":      "👋 Send /start to browse the shop!",
 		"remove":            "❌ Remove",
 		"out_of_stock":      "⚠️ Not enough stock available.",
+		"currency":          "sum",
 	},
 	"uz": {
 		"welcome":           "Do'konga xush kelibsiz, *%s*!\nNima qilmoqchisiz?",
@@ -69,6 +70,7 @@ var translations = map[string]map[string]string{
 		"start_browse":      "👋 Xarid qilish uchun /start ni bosing!",
 		"remove":            "❌ O'chirish",
 		"out_of_stock":      "⚠️ Zaxira yetarli emas.",
+		"currency":          "so'm",
 	},
 	"ru": {
 		"welcome":           "Добро пожаловать в магазин, *%s*!\nЧто бы вы хотели сделать?",
@@ -96,6 +98,7 @@ var translations = map[string]map[string]string{
 		"start_browse":      "👋 Отправьте /start, чтобы просмотреть магазин!",
 		"remove":            "❌ Удалить",
 		"out_of_stock":      "⚠️ Недостаточно товара в наличии.",
+		"currency":          "сум",
 	},
 }
 
@@ -426,7 +429,7 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user
 
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, p := range prods {
-		btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s - %.2f so'm", p.Name, p.Price), "prod:"+p.ID.String())
+		btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s - %.2f %s", p.Name, p.Price, h.T(user, "currency")), "prod:"+p.ID.String())
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(btn))
 	}
 
