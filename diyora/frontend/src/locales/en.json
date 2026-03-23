@@ -18,5 +18,13 @@
     "status": "Status",
     "price": "Price",
     "description": "Description",
-    "actions": "Actions"
+    "actions": "Actions",
+    "manage_inventory": "Manage your inventory and showcase your items.",
+    "add_product": "Add New Product",
+    "organize_products": "Organize your products into logical groups.",
+    "create_category": "Create Category",
+    "track_orders": "Track and process your store's transactions.",
+    "user_management": "User Management",
+    "control_access": "Control access and manage team permissions.",
+    "add_user": "Add New User"
 }

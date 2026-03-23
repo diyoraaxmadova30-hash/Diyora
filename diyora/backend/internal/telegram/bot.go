@@ -35,7 +35,7 @@ var translations = map[string]map[string]string{
 		"your_cart":         "🛒 *Your Cart*",
 		"total":             "Total",
 		"checkout":          "💳 Checkout",
-		"order_placed":      "✅ *Order Placed!*\n\n🆔 ID: `%s`\n💰 Total: *%.2f sum*\n📊 Status: _%s_\n\n📞 We will contact you shortly!",
+		"order_placed":      "✅ *Order Placed!*\n\n🆔 ID: `%s`\n💰 Total: *%s sum*\n📊 Status: _%s_\n\n📞 We will contact you shortly!",
 		"lang_selected":     "🇺🇸 Language updated to English!",
 		"select_lang":       "🌐 Please select your language:",
 		"unknown_cmd":       "❓ Unknown command. Try /start",
@@ -63,7 +63,7 @@ var translations = map[string]map[string]string{
 		"your_cart":         "🛒 *Sizning savatchangiz*",
 		"total":             "Jami",
 		"checkout":          "💳 Buyurtma berish",
-		"order_placed":      "✅ *Buyurtma qabul qilindi!*\n\n🆔 ID: `%s`\n💰 Jami: *%.2f so'm*\n📊 Holat: _%s_\n\n📞 Tez orada siz bilan bog'lanamiz!",
+		"order_placed":      "✅ *Buyurtma qabul qilindi!*\n\n🆔 ID: `%s`\n💰 Jami: *%s so'm*\n📊 Holat: _%s_\n\n📞 Tez orada siz bilan bog'lanamiz!",
 		"lang_selected":     "🇺🇿 Til o'zbek tiliga o'zgartirildi!",
 		"select_lang":       "🌐 Iltimos, tilni tanlang:",
 		"unknown_cmd":       "❓ Noma'lum buyruq. /start ni bosing",
@@ -91,7 +91,7 @@ var translations = map[string]map[string]string{
 		"your_cart":         "🛒 *Ваша корзина*",
 		"total":             "Итого",
 		"checkout":          "💳 Оформить заказ",
-		"order_placed":      "✅ *Заказ оформлен!*\n\n🆔 ID: `%s`\n💰 Итого: *%.2f сум*\n📊 Статус: _%s_\n\n📞 Мы свяжемся с вами в ближайшее время!",
+		"order_placed":      "✅ *Заказ оформлен!*\n\n🆔 ID: `%s`\n💰 Итого: *%s сум*\n📊 Статус: _%s_\n\n📞 Мы свяжемся с вами в ближайшее время!",
 		"lang_selected":     "🇷🇺 Язык изменен на русский!",
 		"select_lang":       "🌐 Пожалуйста, выберите язык:",
 		"unknown_cmd":       "❓ Неизвестная команда. Попробуйте /start",
@@ -429,7 +429,7 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user
 
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, p := range prods {
-		btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s - %.2f %s", p.Name, p.Price, h.T(user, "currency")), "prod:"+p.ID.String())
+		btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s - %s %s", p.Name, formatPrice(p.Price), h.T(user, "currency")), "prod:"+p.ID.String())
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(btn))
 	}
 
@@ -462,7 +462,7 @@ func (h *BotHandler) getProductMessageData(ctx context.Context, prodID uuid.UUID
 
 	totalPrice := prod.Price * float64(displayQty)
 
-	text := fmt.Sprintf("📦 *%s*\n\nЦена: %.0f UZS\nКоличество: %d\nВ наличии: %d\nИтого: %.0f UZS", prod.Name, prod.Price, displayQty, prod.Stock, totalPrice)
+	text := fmt.Sprintf("📦 *%s*\n\nЦена: %s UZS\nКоличество: %d\nВ наличии: %d\nИтого: %s UZS", prod.Name, formatPrice(prod.Price), displayQty, prod.Stock, formatPrice(totalPrice))
 	if prod.Description != nil && *prod.Description != "" {
 		text += fmt.Sprintf("\n\n%s", *prod.Description)
 	}
@@ -598,7 +598,7 @@ func (h *BotHandler) showCart(chatID int64, msgID int, user *models.User) {
 	for _, item := range items {
 		sub := item.Product.Price * float64(item.Quantity)
 		total += sub
-		text += fmt.Sprintf("▪️ %s (x%d) - $%.2f\n", item.Product.Name, item.Quantity, sub)
+		text += fmt.Sprintf("▪️ %s (x%d) - %s %s\n", item.Product.Name, item.Quantity, formatPrice(sub), h.T(user, "currency"))
 
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("-", "c_dec:"+item.Product.ID.String()),
@@ -607,7 +607,7 @@ func (h *BotHandler) showCart(chatID int64, msgID int, user *models.User) {
 		))
 	}
 
-	text += fmt.Sprintf("\n*%s: $%.2f*", h.T(user, "total"), total)
+	text += fmt.Sprintf("\n*%s: %s %s*", h.T(user, "total"), formatPrice(total), h.T(user, "currency"))
 
 	rows = append(rows, tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData(h.T(user, "checkout"), "checkout"),
@@ -654,7 +654,7 @@ func (h *BotHandler) handleCheckout(chatID int64, user *models.User, cartID uuid
 
 	// Send persistent order confirmation
 	shortID := "#" + strings.ToUpper(order.ID.String()[:8])
-	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "order_placed", shortID, order.TotalPrice, order.Status))
+	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "order_placed", shortID, formatPrice(order.TotalPrice), order.Status))
 	msg.ParseMode = "Markdown"
 	h.Bot.Send(msg)
 }
@@ -664,4 +664,16 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func formatPrice(price float64) string {
+	str := strconv.FormatInt(int64(price+0.5), 10)
+	var result []byte
+	for i := 0; i < len(str); i++ {
+		if i > 0 && (len(str)-i)%3 == 0 {
+			result = append(result, ' ')
+		}
+		result = append(result, str[i])
+	}
+	return string(result)
 }

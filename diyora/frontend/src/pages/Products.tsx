@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import { Plus, Pencil, Trash2, Image as ImageIcon, Search, Filter, Package } from 'lucide-react';
 import { Button } from '../components/Button';
@@ -8,6 +9,7 @@ import { Badge } from '../components/Badge';
 import { Modal } from '../components/Modal';
 
 export const Products: React.FC = () => {
+    const { t } = useTranslation();
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -135,12 +137,12 @@ export const Products: React.FC = () => {
         <div className="space-y-6 lg:space-y-10 animate-fade-in overflow-x-hidden">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Products</h1>
-                    <p className="text-sm lg:text-base text-slate-500 font-medium">Manage your inventory and showcase your items.</p>
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">{t('products')}</h1>
+                    <p className="text-sm lg:text-base text-slate-500 font-medium">{t('manage_inventory')}</p>
                 </div>
                 <Button onClick={openNew} className="w-full md:w-auto h-12 px-8 shadow-lg shadow-primary/20">
                     <Plus className="w-5 h-5 mr-3" />
-                    <span>Add New Product</span>
+                    <span>{t('add_product')}</span>
                 </Button>
             </header>
 
@@ -197,7 +199,7 @@ export const Products: React.FC = () => {
                                                 </Badge>
                                             </div>
                                             <h3 className="text-base lg:text-lg font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{prod.name}</h3>
-                                            <p className="font-black text-slate-900 tracking-tight text-lg mt-0.5">{parseFloat(prod.price).toFixed(2)} so'm</p>
+                                            <p className="font-black text-slate-900 tracking-tight text-lg mt-0.5">{Math.round(parseFloat(prod.price)).toLocaleString('ru-RU')} so'm</p>
                                         </div>
                                     </div>
                                     <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100/60">
@@ -273,7 +275,7 @@ export const Products: React.FC = () => {
                         </div>
                         <Input
                             label="Price (sum)"
-                            type="number" step="0.01" required min="0"
+                            type="number" step="1" required min="0"
                             value={formData.price}
                             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                             placeholder="0.00"

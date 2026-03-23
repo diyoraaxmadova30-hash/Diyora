@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import { Package, Truck, CheckCircle, XCircle, Clock, DollarSign, Search, Filter } from 'lucide-react';
 import { Badge } from '../components/Badge';
@@ -32,6 +33,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export const Orders: React.FC = () => {
+    const { t } = useTranslation();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -74,8 +76,8 @@ export const Orders: React.FC = () => {
         <div className="space-y-6 lg:space-y-10 animate-fade-in overflow-x-hidden">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">Orders</h1>
-                    <p className="text-sm lg:text-base text-slate-500 font-medium">Track and process your store's transactions.</p>
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">{t('orders')}</h1>
+                    <p className="text-sm lg:text-base text-slate-500 font-medium">{t('track_orders')}</p>
                 </div>
             </header>
 
@@ -139,7 +141,7 @@ export const Orders: React.FC = () => {
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex flex-col">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                        <p className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">{order.total_price.toFixed(2)} sum</p>
+                                        <p className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">{Math.round(order.total_price).toLocaleString('ru-RU')} sum</p>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="flex flex-col flex-1 sm:flex-none">

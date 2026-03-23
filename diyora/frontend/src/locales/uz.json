@@ -18,5 +18,13 @@
     "status": "Holati",
     "price": "Narxi",
     "description": "Tavsifi",
-    "actions": "Amallar"
+    "actions": "Amallar",
+    "manage_inventory": "Inventaringizni boshqaring va mahsulotlaringizni ko'rsating.",
+    "add_product": "Yangi mahsulot qo'shish",
+    "organize_products": "Mahsulotlaringizni mantiqiy guruhlarga ajrating.",
+    "create_category": "Kategoriya yaratish",
+    "track_orders": "Do'koningiz tranzaksiyalarini kuzating va qayta ishlang.",
+    "user_management": "Foydalanuvchilarni boshqarish",
+    "control_access": "Kirishni boshqaring va jamoa ruxsatlarini boshqaring.",
+    "add_user": "Yangi foydalanuvchi qo'shish"
 }

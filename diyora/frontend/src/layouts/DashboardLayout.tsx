@@ -133,14 +133,7 @@ export const DashboardLayout: React.FC = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 lg:ml-72 min-h-screen flex flex-col pt-20 lg:pt-0">
-                <header className="hidden lg:flex h-24 items-center justify-between px-10 bg-transparent">
-                    <h2 className="text-2xl font-bold text-slate-900">
-                        {navigation.find(n => n.href === location.pathname)?.name || t('dashboard')}
-                    </h2>
-                    <div className="flex items-center gap-4">
-                        {/* Optional header items */}
-                    </div>
-                </header>
+
                 <main className="flex-1 p-4 sm:p-6 lg:p-10 animate-fade-in overflow-x-hidden">
                     <div className="max-w-7xl mx-auto w-full">
                         <Outlet />
