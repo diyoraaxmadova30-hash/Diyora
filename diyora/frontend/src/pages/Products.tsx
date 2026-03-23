@@ -272,7 +272,7 @@ export const Products: React.FC = () => {
                             </select>
                         </div>
                         <Input
-                            label="Price ($)"
+                            label="Price (sum)"
                             type="number" step="0.01" required min="0"
                             value={formData.price}
                             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
