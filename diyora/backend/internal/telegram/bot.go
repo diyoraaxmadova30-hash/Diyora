@@ -35,7 +35,7 @@ var translations = map[string]map[string]string{
 		"your_cart":         "🛒 *Your Cart*",
 		"total":             "Total",
 		"checkout":          "💳 Checkout",
-		"order_placed":      "✅ *Order Placed!*\n\n🆔 ID: `%s`\n💰 Total: *$%.2f*\n📊 Status: _%s_\n\n📞 We will contact you shortly!",
+		"order_placed":      "✅ *Order Placed!*\n\n🆔 ID: `%s`\n💰 Total: *%.2f sum*\n📊 Status: _%s_\n\n📞 We will contact you shortly!",
 		"lang_selected":     "🇺🇸 Language updated to English!",
 		"select_lang":       "🌐 Please select your language:",
 		"unknown_cmd":       "❓ Unknown command. Try /start",
@@ -62,7 +62,7 @@ var translations = map[string]map[string]string{
 		"your_cart":         "🛒 *Sizning savatchangiz*",
 		"total":             "Jami",
 		"checkout":          "💳 Buyurtma berish",
-		"order_placed":      "✅ *Buyurtma qabul qilindi!*\n\n🆔 ID: `%s`\n💰 Jami: *$%.2f*\n📊 Holat: _%s_\n\n📞 Tez orada siz bilan bog'lanamiz!",
+		"order_placed":      "✅ *Buyurtma qabul qilindi!*\n\n🆔 ID: `%s`\n💰 Jami: *%.2f so'm*\n📊 Holat: _%s_\n\n📞 Tez orada siz bilan bog'lanamiz!",
 		"lang_selected":     "🇺🇿 Til o'zbek tiliga o'zgartirildi!",
 		"select_lang":       "🌐 Iltimos, tilni tanlang:",
 		"unknown_cmd":       "❓ Noma'lum buyruq. /start ni bosing",
@@ -89,7 +89,7 @@ var translations = map[string]map[string]string{
 		"your_cart":         "🛒 *Ваша корзина*",
 		"total":             "Итого",
 		"checkout":          "💳 Оформить заказ",
-		"order_placed":      "✅ *Заказ оформлен!*\n\n🆔 ID: `%s`\n💰 Итого: *$%.2f*\n📊 Статус: _%s_\n\n📞 Мы свяжемся с вами в ближайшее время!",
+		"order_placed":      "✅ *Заказ оформлен!*\n\n🆔 ID: `%s`\n💰 Итого: *%.2f сум*\n📊 Статус: _%s_\n\n📞 Мы свяжемся с вами в ближайшее время!",
 		"lang_selected":     "🇷🇺 Язык изменен на русский!",
 		"select_lang":       "🌐 Пожалуйста, выберите язык:",
 		"unknown_cmd":       "❓ Неизвестная команда. Попробуйте /start",
@@ -426,7 +426,7 @@ func (h *BotHandler) showProducts(chatID int64, msgID int, catID uuid.UUID, user
 
 	var rows [][]tgbotapi.InlineKeyboardButton
 	for _, p := range prods {
-		btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s - $%.2f", p.Name, p.Price), "prod:"+p.ID.String())
+		btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s - %.2f so'm", p.Name, p.Price), "prod:"+p.ID.String())
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(btn))
 	}
 
