@@ -194,12 +194,17 @@ export const Products: React.FC = () => {
                                                 <Badge variant="info" className="py-0.5 px-2 text-[8px] lg:text-[10px] font-black tracking-widest uppercase truncate max-w-[120px]">
                                                     {cat?.name || 'Uncategorized'}
                                                 </Badge>
-                                                <Badge variant={prod.stock > 0 ? "success" : "danger"} className="py-0.5 px-2 text-[8px] lg:text-[10px] font-black tracking-widest uppercase whitespace-nowrap">
-                                                    {prod.stock > 0 ? `${prod.stock} In Stock` : 'Out of Stock'}
+                                                <Badge variant={prod.stock > 0 ? (prod.stock < 10 ? "warning" : "success") : "danger"} className="py-0.5 px-2 text-[8px] lg:text-[10px] font-black tracking-widest uppercase whitespace-nowrap">
+                                                    {prod.stock > 0 ? (prod.stock < 10 ? `Low Stock (${prod.stock})` : `${prod.stock} In Stock`) : 'Out of Stock'}
                                                 </Badge>
                                             </div>
                                             <h3 className="text-base lg:text-lg font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{prod.name}</h3>
-                                            <p className="font-black text-slate-900 tracking-tight text-lg mt-0.5">{Math.round(parseFloat(prod.price)).toLocaleString('ru-RU')} so'm</p>
+                                            <div className="flex items-center justify-between gap-4 mt-0.5">
+                                                <p className="font-black text-slate-900 tracking-tight text-lg">{Math.round(parseFloat(prod.price)).toLocaleString('ru-RU')} so'm</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                                    Updated: {new Date(prod.updated_at || prod.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100/60">

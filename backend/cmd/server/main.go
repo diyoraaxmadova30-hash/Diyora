@@ -57,6 +57,7 @@ func main() {
 	prodHandler := handlers.NewProductHandler(prodRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
 	orderHandler := handlers.NewOrderHandler(orderRepo)
+	invHandler := handlers.NewInventoryHandler(prodRepo)
 
 	// Setup Gin Router
 	r := gin.Default()
@@ -108,6 +109,13 @@ func main() {
 		orderGroup.GET("", orderHandler.GetAll)
 		orderGroup.GET("/:id", orderHandler.GetByID)
 		orderGroup.PUT("/:id/status", orderHandler.UpdateStatus)
+	}
+
+	// Inventory
+	invGroup := api.Group("/inventory", middleware.AuthMiddleware(), middleware.AdminMiddleware())
+	{
+		invGroup.GET("/stats", invHandler.GetStats)
+		invGroup.GET("/low-stock", invHandler.GetLowStock)
 	}
 
 	// Users (Admin mostly)

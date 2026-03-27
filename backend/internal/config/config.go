@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -17,9 +18,26 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println("No .env file found; falling back to environment variables")
+	envPaths := []string{
+		".env",
+		"../.env",
+		"../../.env",
+	}
+
+	loaded := false
+	for _, path := range envPaths {
+		if err := godotenv.Load(path); err == nil {
+			loaded = true
+			break
+		}
+	}
+
+	if !loaded {
+		if cwd, err := os.Getwd(); err == nil {
+			log.Printf("No .env file found from %s; falling back to environment variables", filepath.Clean(cwd))
+		} else {
+			log.Println("No .env file found; falling back to environment variables")
+		}
 	}
 
 	return &Config{

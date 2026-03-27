@@ -8,13 +8,21 @@ import { Card } from '../components/Card';
 import { Input as CustomInput } from '../components/Input';
 
 export const Login: React.FC = () => {
-    const { login, user } = useAuth();
+    const { login, user, loading: authLoading } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    if (user) return <Navigate to="/" replace />;
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (user?.role === 'admin') return <Navigate to="/" replace />;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

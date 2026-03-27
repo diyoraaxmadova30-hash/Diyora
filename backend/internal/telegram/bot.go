@@ -43,6 +43,13 @@ var translations = map[string]map[string]string{
 		"remove":            "❌ Remove",
 		"out_of_stock":      "⚠️ Not enough stock available.",
 		"currency":          "sum",
+		"cmd_products":      "📦 *Available Products:*",
+		"cmd_stock":         "📋 *Inventory Stock:*",
+		"cmd_add_usage":     "Usage: `/addproduct Name;Price;Stock;CategoryID`",
+		"cmd_update_usage":  "Usage: `/update ProductID;Quantity;Price`",
+		"product_added":     "✅ Product added successfully!",
+		"product_updated":   "✅ Product updated successfully!",
+		"admin_only":        "🚫 This command is for admins only.",
 	},
 	"uz": {
 		"welcome":           "Do'konga xush kelibsiz, *%s*!\nNima qilmoqchisiz?",
@@ -71,6 +78,13 @@ var translations = map[string]map[string]string{
 		"remove":            "❌ O'chirish",
 		"out_of_stock":      "⚠️ Zaxira yetarli emas.",
 		"currency":          "so'm",
+		"cmd_products":      "📦 *Mavjud mahsulotlar:*",
+		"cmd_stock":         "📋 *Ombor qoldig'i:*",
+		"cmd_add_usage":     "Foydalanish: `/addproduct Nom;Narx;Soni;KategoriyaID`",
+		"cmd_update_usage":  "Foydalanish: `/update MahsulotID;Soni;Narx`",
+		"product_added":     "✅ Mahsulot muvaffaqiyatli qo'shildi!",
+		"product_updated":   "✅ Mahsulot muvaffaqiyatli yangilandi!",
+		"admin_only":        "🚫 Ushbu buyruq faqat adminlar uchun.",
 	},
 	"ru": {
 		"welcome":           "Добро пожаловать в магазин, *%s*!\nЧто бы вы хотели сделать?",
@@ -99,6 +113,13 @@ var translations = map[string]map[string]string{
 		"remove":            "❌ Удалить",
 		"out_of_stock":      "⚠️ Недостаточно товара в наличии.",
 		"currency":          "сум",
+		"cmd_products":      "📦 *Доступные товары:*",
+		"cmd_stock":         "📋 *Остатки на складе:*",
+		"cmd_add_usage":     "Использование: `/addproduct Название;Цена;Кол-во;ID_Категории`",
+		"cmd_update_usage":  "Использование: `/update ID_Товара;Кол-во;Цена`",
+		"product_added":     "✅ Товар успешно добавлен!",
+		"product_updated":   "✅ Товар успешно обновлен!",
+		"admin_only":        "🚫 Эта команда только для администраторов.",
 	},
 }
 
@@ -180,6 +201,26 @@ func (h *BotHandler) handleMessage(msg *tgbotapi.Message) {
 		switch cmd {
 		case "start":
 			h.handleStartCmd(msg.Chat.ID, user)
+		case "products":
+			h.handleProductsCmd(msg.Chat.ID, user)
+		case "stock":
+			if user.Role != "admin" {
+				h.replyText(msg.Chat.ID, h.T(user, "admin_only"))
+				return
+			}
+			h.handleStockCmd(msg.Chat.ID, user)
+		case "addproduct":
+			if user.Role != "admin" {
+				h.replyText(msg.Chat.ID, h.T(user, "admin_only"))
+				return
+			}
+			h.handleAddProductCmd(msg.Chat.ID, user, msg.CommandArguments())
+		case "update":
+			if user.Role != "admin" {
+				h.replyText(msg.Chat.ID, h.T(user, "admin_only"))
+				return
+			}
+			h.handleUpdateCmd(msg.Chat.ID, user, msg.CommandArguments())
 		default:
 			h.replyText(msg.Chat.ID, h.T(user, "unknown_cmd"))
 		}
@@ -657,6 +698,112 @@ func (h *BotHandler) handleCheckout(chatID int64, user *models.User, cartID uuid
 	msg := tgbotapi.NewMessage(chatID, h.Tf(user, "order_placed", shortID, formatPrice(order.TotalPrice), order.Status))
 	msg.ParseMode = "Markdown"
 	h.Bot.Send(msg)
+}
+
+func (h *BotHandler) handleProductsCmd(chatID int64, user *models.User) {
+	prods, err := h.ProdRepo.GetAll(context.Background(), nil, "", 50, 0)
+	if err != nil {
+		h.replyText(chatID, h.T(user, "err_loading"))
+		return
+	}
+
+	text := h.T(user, "cmd_products") + "\n\n"
+	for _, p := range prods {
+		if p.Stock > 0 {
+			text += fmt.Sprintf("🔹 *%s* - %s %s\n", p.Name, formatPrice(p.Price), h.T(user, "currency"))
+		}
+	}
+	h.replyText(chatID, text)
+}
+
+func (h *BotHandler) handleStockCmd(chatID int64, user *models.User) {
+	prods, err := h.ProdRepo.GetAll(context.Background(), nil, "", 100, 0)
+	if err != nil {
+		h.replyText(chatID, h.T(user, "err_loading"))
+		return
+	}
+
+	text := h.T(user, "cmd_stock") + "\n\n"
+	for _, p := range prods {
+		status := "✅"
+		if p.Stock == 0 {
+			status = "❌"
+		} else if p.Stock < 10 {
+			status = "⚠️"
+		}
+		text += fmt.Sprintf("%s *%s*: %d pcs - %s\n`ID: %s`\n", status, p.Name, p.Stock, formatPrice(p.Price), p.ID.String())
+	}
+	h.replyText(chatID, text)
+}
+
+func (h *BotHandler) handleAddProductCmd(chatID int64, user *models.User, args string) {
+	if args == "" {
+		h.replyText(chatID, h.T(user, "cmd_add_usage"))
+		return
+	}
+
+	parts := strings.Split(args, ";")
+	if len(parts) < 4 {
+		h.replyText(chatID, h.T(user, "cmd_add_usage"))
+		return
+	}
+
+	name := strings.TrimSpace(parts[0])
+	price, _ := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
+	stock, _ := strconv.Atoi(strings.TrimSpace(parts[2]))
+	catID, _ := uuid.Parse(strings.TrimSpace(parts[3]))
+
+	p := &models.Product{
+		Name:       name,
+		Price:      price,
+		Stock:      stock,
+		CategoryID: &catID,
+	}
+
+	if err := h.ProdRepo.Create(context.Background(), p); err != nil {
+		h.replyText(chatID, h.T(user, "err_loading")+": "+err.Error())
+		return
+	}
+
+	h.replyText(chatID, h.T(user, "product_added"))
+}
+
+func (h *BotHandler) handleUpdateCmd(chatID int64, user *models.User, args string) {
+	if args == "" {
+		h.replyText(chatID, h.T(user, "cmd_update_usage"))
+		return
+	}
+
+	parts := strings.Split(args, ";")
+	if len(parts) < 3 {
+		h.replyText(chatID, h.T(user, "cmd_update_usage"))
+		return
+	}
+
+	id, err := uuid.Parse(strings.TrimSpace(parts[0]))
+	if err != nil {
+		h.replyText(chatID, "Invalid Product ID")
+		return
+	}
+
+	qty, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
+	price, _ := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
+
+	p, err := h.ProdRepo.GetByID(context.Background(), id)
+	if err != nil || p == nil {
+		h.replyText(chatID, "Product not found")
+		return
+	}
+
+	p.Stock = qty
+	p.Price = price
+
+	if err := h.ProdRepo.Update(context.Background(), p); err != nil {
+		h.replyText(chatID, h.T(user, "err_loading")+": "+err.Error())
+		return
+	}
+
+	h.replyText(chatID, h.T(user, "product_updated"))
 }
 
 func min(a, b int) int {

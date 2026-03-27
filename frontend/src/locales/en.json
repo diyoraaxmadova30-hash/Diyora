@@ -3,6 +3,7 @@
     "users": "Users",
     "categories": "Categories",
     "products": "Products",
+    "inventory": "Inventory",
     "orders": "Orders",
     "logout": "Logout",
     "language": "Language",

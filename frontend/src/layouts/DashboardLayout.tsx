@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ShoppingBag, FolderTree, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingBag, FolderTree, ShoppingCart, LogOut, Menu, X, Warehouse } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,7 @@ export const DashboardLayout: React.FC = () => {
         { name: t('dashboard'), href: '/', icon: LayoutDashboard },
         { name: t('categories'), href: '/categories', icon: FolderTree },
         { name: t('products'), href: '/products', icon: ShoppingBag },
+        { name: t('inventory'), href: '/inventory', icon: Warehouse },
         { name: t('orders'), href: '/orders', icon: ShoppingCart },
         { name: t('users'), href: '/users', icon: Users },
     ];

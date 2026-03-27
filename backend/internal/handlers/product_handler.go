@@ -21,12 +21,12 @@ func NewProductHandler(repo *repositories.ProductRepo) *ProductHandler {
 }
 
 type ProductRequest struct {
-	Name        string    `json:"name" binding:"required"`
-	Description *string   `json:"description"`
-	Price       float64   `json:"price" binding:"required,gt=0"`
-	Stock       int       `json:"stock"`
-	ImageURL    *string   `json:"image_url"`
-	CategoryID  uuid.UUID `json:"category_id" binding:"required"`
+	Name        string     `json:"name" binding:"required"`
+	Description *string    `json:"description"`
+	Price       float64    `json:"price" binding:"required,gt=0"`
+	Stock       int        `json:"stock"`
+	ImageURL    *string    `json:"image_url"`
+	CategoryID  *uuid.UUID `json:"category_id"`
 }
 
 func (h *ProductHandler) GetAll(c *gin.Context) {

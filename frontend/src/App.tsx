@@ -8,11 +8,12 @@ import { Categories } from './pages/Categories';
 import { Products } from './pages/Products';
 import { Orders } from './pages/Orders';
 import { Users } from './pages/Users';
+import { Inventory } from './pages/Inventory';
 
 function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <Routes>
                     <Route path="/login" element={<Login />} />
 
@@ -21,6 +22,7 @@ function App() {
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/categories" element={<Categories />} />
                             <Route path="/products" element={<Products />} />
+                            <Route path="/inventory" element={<Inventory />} />
                             <Route path="/orders" element={<Orders />} />
                             <Route path="/users" element={<Users />} />
                         </Route>
